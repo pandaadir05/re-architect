@@ -1,4 +1,4 @@
-.PHONY: setup clean test lint docker-build docker-run install dev help frontend mock-web
+.PHONY: setup clean test lint docker-build docker-run install dev help frontend mock-web docs security e2e
 
 # Set default shell to bash
 SHELL := /bin/bash
@@ -8,9 +8,11 @@ PYTHON := python
 PIP := pip
 PYTEST := pytest
 FLAKE8 := flake8
+BANDIT := bandit
 
 # Frontend settings
 NPM := npm
+PLAYWRIGHT := npx playwright
 
 # Docker settings
 DOCKER := docker
@@ -31,6 +33,9 @@ help:
 	@echo "web           - Start the web visualization server"
 	@echo "mock-web      - Start the web visualization server with mock data"
 	@echo "frontend      - Start the React frontend development server"
+	@echo "docs          - Generate API documentation"
+	@echo "security      - Run security scan on code"
+	@echo "e2e           - Run end-to-end tests with Playwright"
 	@echo "dev           - Run in development mode"
 
 setup:
@@ -67,6 +72,17 @@ mock-web:
 
 frontend:
 	cd frontend && $(NPM) start
+
+docs:
+	$(PIP) install -r requirements-dev.txt
+	$(PYTHON) docs/generate_api_docs.py
+
+security:
+	$(BANDIT) -r src/ -x tests/ -f html -o security-report.html
+	@echo "Security report generated: security-report.html"
+
+e2e:
+	cd frontend && $(NPM) run e2e
 
 dev:
 	$(PYTHON) main.py $(ARGS)
