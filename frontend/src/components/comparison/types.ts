@@ -60,6 +60,20 @@ export interface MetricChange {
   change_percentage: number;
 }
 
+// Call Graph Types
+export interface CallGraphNode {
+  id: string;
+  name: string;
+  type: 'function' | 'external';
+  change_type: ChangeType;
+}
+
+export interface CallGraphEdge {
+  source: string;
+  target: string;
+  change_type: ChangeType;
+}
+
 // Comparison Result
 export interface ComparisonResult {
   id: string;

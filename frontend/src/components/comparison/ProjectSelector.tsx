@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
 import { Box, Button, Card, CardContent, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { fetchProjects, selectProject1, selectProject2, createComparison } from '../../redux/slices/comparisonSlice';
+import { createComparison, fetchProjects, selectProject1, selectProject2 } from '../../redux/slices/comparisonSlice';
 
 /**
  * Component for selecting two projects to compare

@@ -1,31 +1,29 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Tooltip,
-  Collapse,
-} from '@mui/material';
-import { useAppSelector } from '../../redux/hooks';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import {
+    Box,
+    Card,
+    CardContent,
+    Chip,
+    Collapse,
+    IconButton,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import React, { useState } from 'react';
+import { useAppSelector } from '../../redux/hooks';
 import { ChangeType, StructureChange } from './types';
 
 // Color mapping based on change type
@@ -52,7 +50,10 @@ const getChangeTypeIcon = (changeType: ChangeType) => {
 };
 
 // Row component for expandable table rows
-const StructureRow: React.FC<{ structure: StructureChange }> = ({ structure }) => {
+const StructureRow: React.FC<{ 
+  structure: StructureChange, 
+  onViewStructure?: (structureId: string) => void 
+}> = ({ structure, onViewStructure }) => {
   const [open, setOpen] = useState(false);
   const hasFieldChanges = structure.field_changes && structure.field_changes.length > 0;
 
@@ -85,7 +86,10 @@ const StructureRow: React.FC<{ structure: StructureChange }> = ({ structure }) =
             </IconButton>
           ) : (
             <Tooltip title="View Structure Details">
-              <IconButton size="small">
+              <IconButton 
+                size="small"
+                onClick={() => onViewStructure && onViewStructure(structure.id)}
+              >
                 <VisibilityIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -136,7 +140,15 @@ const StructureRow: React.FC<{ structure: StructureChange }> = ({ structure }) =
 /**
  * Component for displaying structure changes in a comparison
  */
-const StructureChangesTable: React.FC<{ comparisonId: string }> = ({ comparisonId }) => {
+const StructureChangesTable: React.FC<{ 
+  comparisonId: string, 
+  onViewStructure?: (structureId: string) => void,
+  searchQuery?: string
+}> = ({ 
+  comparisonId,
+  onViewStructure,
+  searchQuery = ''
+}) => {
   const { structureChanges } = useAppSelector((state) => state.comparison);
   
   // Pagination state
@@ -153,10 +165,24 @@ const StructureChangesTable: React.FC<{ comparisonId: string }> = ({ comparisonI
     setPage(0);
   };
 
-  // Filter structures to this comparison
-  // In a real application, we would filter by comparisonId
-  // Here we're just displaying all structures for demonstration
-  const filteredStructures = structureChanges;
+  // Filter structures to this comparison and by search query
+  const filteredStructures = structureChanges.filter(structure => {
+    // First filter by comparison ID if implemented
+    // const matchesComparison = structure.comparisonId === comparisonId;
+    
+    // Then filter by search query if provided
+    const matchesSearch = searchQuery ? 
+      structure.structure_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      // Also search in field names if the structure has field changes
+      (structure.field_changes?.some(field => 
+        field.field_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (field.base_type && field.base_type.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (field.target_type && field.target_type.toLowerCase().includes(searchQuery.toLowerCase()))
+      ) || false)
+      : true;
+      
+    return /* matchesComparison && */ matchesSearch;
+  });
   
   const displayedStructures = filteredStructures
     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -200,7 +226,11 @@ const StructureChangesTable: React.FC<{ comparisonId: string }> = ({ comparisonI
             </TableHead>
             <TableBody>
               {displayedStructures.map((structure) => (
-                <StructureRow key={structure.id} structure={structure} />
+                <StructureRow 
+                  key={structure.id} 
+                  structure={structure} 
+                  onViewStructure={onViewStructure} 
+                />
               ))}
               {displayedStructures.length === 0 && (
                 <TableRow>

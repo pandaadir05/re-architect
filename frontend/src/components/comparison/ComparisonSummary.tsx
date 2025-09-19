@@ -1,20 +1,20 @@
-import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Paper,
-  Typography,
-  LinearProgress,
-} from '@mui/material';
-import { useAppSelector } from '../../redux/hooks';
 import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
 import RemoveIcon from '@mui/icons-material/Remove';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import CheckIcon from '@mui/icons-material/Check';
+import {
+    Box,
+    Card,
+    CardContent,
+    Chip,
+    Divider,
+    Grid,
+    LinearProgress,
+    Paper,
+    Typography,
+} from '@mui/material';
+import React from 'react';
+import { useAppSelector } from '../../redux/hooks';
 
 /**
  * Component for displaying a summary of comparison results

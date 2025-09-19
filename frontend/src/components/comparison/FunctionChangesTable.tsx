@@ -1,29 +1,27 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import { useAppSelector } from '../../redux/hooks';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { ChangeType, FunctionChange } from './types';
+import {
+    Box,
+    Card,
+    CardContent,
+    Chip,
+    IconButton,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    Tooltip,
+    Typography
+} from '@mui/material';
+import React, { useState } from 'react';
+import { useAppSelector } from '../../redux/hooks';
+import { ChangeType } from './types';
 
 // Color mapping based on change type
 const getChangeTypeColor = (changeType: ChangeType) => {
@@ -51,7 +49,15 @@ const getChangeTypeIcon = (changeType: ChangeType) => {
 /**
  * Component for displaying function changes in a comparison
  */
-const FunctionChangesTable: React.FC<{ comparisonId: string }> = ({ comparisonId }) => {
+const FunctionChangesTable: React.FC<{ 
+  comparisonId: string,
+  onViewFunction?: (functionId: string) => void,
+  searchQuery?: string
+}> = ({ 
+  comparisonId, 
+  onViewFunction,
+  searchQuery = ''
+}) => {
   const { functionChanges } = useAppSelector((state) => state.comparison);
   
   // Pagination state
@@ -68,10 +74,20 @@ const FunctionChangesTable: React.FC<{ comparisonId: string }> = ({ comparisonId
     setPage(0);
   };
 
-  // Filter functions to this comparison
-  // In a real application, we would filter by comparisonId
-  // Here we're just displaying all functions for demonstration
-  const filteredFunctions = functionChanges;
+  // Filter functions to this comparison and by search query
+  const filteredFunctions = functionChanges.filter(func => {
+    // First filter by comparison ID if implemented
+    // const matchesComparison = func.comparisonId === comparisonId;
+    
+    // Then filter by search query if provided
+    const matchesSearch = searchQuery ? 
+      func.function_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (func.base_address && func.base_address.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (func.target_address && func.target_address.toLowerCase().includes(searchQuery.toLowerCase()))
+      : true;
+      
+    return /* matchesComparison && */ matchesSearch;
+  });
   
   const displayedFunctions = filteredFunctions
     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -142,7 +158,10 @@ const FunctionChangesTable: React.FC<{ comparisonId: string }> = ({ comparisonId
                   </TableCell>
                   <TableCell align="center">
                     <Tooltip title="View Function Details">
-                      <IconButton size="small">
+                      <IconButton 
+                        size="small"
+                        onClick={() => onViewFunction && onViewFunction(func.id)}
+                      >
                         <VisibilityIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>

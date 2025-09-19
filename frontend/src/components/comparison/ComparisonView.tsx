@@ -1,25 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import AddIcon from '@mui/icons-material/Add';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import HomeIcon from '@mui/icons-material/Home';
+import SearchIcon from '@mui/icons-material/Search';
 import {
-  Box,
-  Container,
-  Grid,
-  Paper,
-  Typography,
-  Tab,
-  Tabs,
-  Breadcrumbs,
-  Link,
-  Button,
+    Box,
+    Breadcrumbs,
+    Button,
+    Container,
+    Grid,
+    InputAdornment,
+    Link,
+    Paper,
+    Tab,
+    Tabs,
+    TextField,
+    Typography,
 } from '@mui/material';
-import { useAppSelector, useAppDispatch } from '../../redux/hooks';
-import { fetchProjects, fetchComparison, fetchFunctionChanges, fetchStructureChanges } from '../../redux/slices/comparisonSlice';
-import ProjectSelector from './ProjectSelector';
+import React, { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { fetchComparison, fetchFunctionChanges, fetchProjects, fetchStructureChanges } from '../../redux/slices/comparisonSlice';
+import CallGraphVisualization from './CallGraphVisualization';
 import ComparisonSummary from './ComparisonSummary';
 import FunctionChangesTable from './FunctionChangesTable';
+import FunctionDiffViewer from './FunctionDiffViewer';
+import ProjectSelector from './ProjectSelector';
 import StructureChangesTable from './StructureChangesTable';
-import HomeIcon from '@mui/icons-material/Home';
-import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
-import AddIcon from '@mui/icons-material/Add';
+import StructureDiffViewer from './StructureDiffViewer';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -50,6 +56,10 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index, ...other })
  */
 const ComparisonView: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
+  const [selectedFunctionId, setSelectedFunctionId] = useState<string | null>(null);
+  const [selectedStructureId, setSelectedStructureId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  
   const dispatch = useAppDispatch();
   const { 
     selectedComparisonId,
@@ -77,9 +87,28 @@ const ComparisonView: React.FC = () => {
     ? comparisons.find(c => c.id === selectedComparisonId) 
     : null;
 
-  // Tab change handler
+  // Event handlers
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    setSearchQuery(''); // Clear search query when switching tabs
+  };
+
+  const handleViewFunction = (functionId: string) => {
+    setSelectedFunctionId(functionId);
+  };
+
+  const handleViewStructure = (structureId: string) => {
+    setSelectedStructureId(structureId);
+  };
+
+  const handleBackToFunctions = () => {
+    setSelectedFunctionId(null);
+    setSearchQuery(''); // Clear search when going back to list
+  };
+
+  const handleBackToStructures = () => {
+    setSelectedStructureId(null);
+    setSearchQuery(''); // Clear search when going back to list
   };
 
   return (
@@ -128,18 +157,38 @@ const ComparisonView: React.FC = () => {
         <>
           {/* Comparison tabs */}
           <Paper sx={{ mb: 3 }}>
-            <Tabs 
-              value={tabValue} 
-              onChange={handleTabChange}
-              indicatorColor="primary"
-              textColor="primary"
-              sx={{ borderBottom: 1, borderColor: 'divider' }}
-            >
-              <Tab label="Overview" />
-              <Tab label="Functions" />
-              <Tab label="Structures" />
-              <Tab label="Call Graph" />
-            </Tabs>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center', px: 2, pt: 1 }}>
+              <Tabs 
+                value={tabValue} 
+                onChange={handleTabChange}
+                indicatorColor="primary"
+                textColor="primary"
+                sx={{ borderBottom: 0 }}
+              >
+                <Tab label="Overview" />
+                <Tab label="Functions" />
+                <Tab label="Structures" />
+                <Tab label="Call Graph" />
+              </Tabs>
+              
+              {/* Search box - only show for Functions and Structures tabs */}
+              {(tabValue === 1 || tabValue === 2) && (
+                <TextField
+                  size="small"
+                  placeholder={`Search ${tabValue === 1 ? 'functions' : 'structures'}...`}
+                  value={searchQuery}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                  sx={{ mb: 1, width: { xs: '100%', sm: '250px' } }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
+            </Box>
           </Paper>
 
           {/* Tab panels */}
@@ -148,22 +197,41 @@ const ComparisonView: React.FC = () => {
           </TabPanel>
           
           <TabPanel value={tabValue} index={1}>
-            <FunctionChangesTable comparisonId={selectedComparisonId} />
+            {selectedFunctionId ? (
+              <FunctionDiffViewer
+                comparisonId={selectedComparisonId}
+                functionId={selectedFunctionId}
+                onBack={handleBackToFunctions}
+              />
+            ) : (
+              <FunctionChangesTable 
+                comparisonId={selectedComparisonId} 
+                onViewFunction={handleViewFunction}
+                searchQuery={searchQuery}
+              />
+            )}
           </TabPanel>
           
           <TabPanel value={tabValue} index={2}>
-            <StructureChangesTable comparisonId={selectedComparisonId} />
+            {selectedStructureId ? (
+              <StructureDiffViewer
+                comparisonId={selectedComparisonId}
+                structureId={selectedStructureId}
+                onBack={handleBackToStructures}
+              />
+            ) : (
+              <StructureChangesTable 
+                comparisonId={selectedComparisonId}
+                onViewStructure={handleViewStructure}
+                searchQuery={searchQuery}
+              />
+            )}
           </TabPanel>
           
           <TabPanel value={tabValue} index={3}>
-            <Paper elevation={3} sx={{ p: 3, textAlign: 'center' }}>
-              <Typography variant="h6" color="text.secondary">
-                Call Graph Visualization
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                This feature is coming soon
-              </Typography>
-            </Paper>
+            {selectedComparisonId && (
+              <CallGraphVisualization comparisonId={selectedComparisonId} />
+            )}
           </TabPanel>
         </>
       )}

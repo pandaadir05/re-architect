@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { fetchProjects, fetchComparisons } from '../redux/slices/comparisonSlice';
 import ComparisonView from '../components/comparison/ComparisonView';
+import { useAppDispatch } from '../redux/hooks';
+import { fetchComparisons, fetchProjects } from '../redux/slices/comparisonSlice';
 
 /**
  * Binary Comparison Page Component
