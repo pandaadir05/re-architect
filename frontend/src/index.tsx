@@ -1,9 +1,11 @@
+import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import App from './App';
 import './index.css';
+import { store } from './redux/store';
 
 // Create a theme instance for dark mode
 const darkTheme = createTheme({
@@ -55,11 +57,13 @@ const root = createRoot(container!);
 
 root.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider theme={darkTheme}>
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <App />
+        </ThemeProvider>
+      </BrowserRouter>
+    </Provider>
   </React.StrictMode>
 );
