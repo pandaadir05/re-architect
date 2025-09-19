@@ -1,22 +1,23 @@
-import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
 import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Box,
-  Toolbar,
-  Divider,
-} from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  Code as CodeIcon,
-  DataObject as DataObjectIcon,
-  Science as ScienceIcon,
-  Settings as SettingsIcon,
+    Code as CodeIcon,
+    Compare as CompareIcon,
+    Dashboard as DashboardIcon,
+    DataObject as DataObjectIcon,
+    Science as ScienceIcon,
+    Settings as SettingsIcon,
 } from '@mui/icons-material';
+import {
+    Box,
+    Divider,
+    Drawer,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Toolbar,
+} from '@mui/material';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
 // Define drawer width
 const drawerWidth = 240;
@@ -28,6 +29,7 @@ const Sidebar: React.FC = () => {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'Binary Analysis', icon: <CodeIcon />, path: '/analysis' },
+    { text: 'Binary Comparison', icon: <CompareIcon />, path: '/comparison' },
     { text: 'Data Structures', icon: <DataObjectIcon />, path: '/structures' },
     { text: 'Test Harnesses', icon: <ScienceIcon />, path: '/tests' },
     { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },

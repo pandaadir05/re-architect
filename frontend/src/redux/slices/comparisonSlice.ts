@@ -78,30 +78,34 @@ export interface Comparison {
 // State
 interface ComparisonState {
   projects: Project[];
-  selectedProject1: string | null;
-  selectedProject2: string | null;
+  baseProjectId: string | null;
+  baseVersionId: string | null;
+  targetProjectId: string | null;
+  targetVersionId: string | null;
   comparisons: Comparison[];
-  selectedComparison: string | null;
+  selectedComparisonId: string | null;
   functionChanges: FunctionChange[];
   structureChanges: StructureChange[];
   metricChanges: MetricChange[];
-  selectedFunction: string | null;
-  selectedStructure: string | null;
+  selectedFunctionId: string | null;
+  selectedStructureId: string | null;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: ComparisonState = {
   projects: [],
-  selectedProject1: null,
-  selectedProject2: null,
+  baseProjectId: null,
+  baseVersionId: null,
+  targetProjectId: null,
+  targetVersionId: null,
   comparisons: [],
-  selectedComparison: null,
+  selectedComparisonId: null,
   functionChanges: [],
   structureChanges: [],
   metricChanges: [],
-  selectedFunction: null,
-  selectedStructure: null,
+  selectedFunctionId: null,
+  selectedStructureId: null,
   loading: false,
   error: null,
 };
@@ -182,40 +186,29 @@ export const createComparison = createAsyncThunk(
   }
 );
 
+export const fetchComparison = createAsyncThunk(
+  'comparison/fetchComparison',
+  async (comparisonId: string, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/comparison/comparisons/${comparisonId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch comparison details');
+      }
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue((error as Error).message);
+    }
+  }
+);
+
 export const fetchFunctionChanges = createAsyncThunk(
   'comparison/fetchFunctionChanges',
   async (
-    {
-      comparisonId,
-      page = 1,
-      pageSize = 50,
-      changeType,
-      name,
-      sort,
-    }: {
-      comparisonId: string;
-      page?: number;
-      pageSize?: number;
-      changeType?: string;
-      name?: string;
-      sort?: string;
-    },
+    comparisonId: string,
     { rejectWithValue }
   ) => {
     try {
-      let url = `${API_BASE_URL}/comparison/${comparisonId}/functions?page=${page}&page_size=${pageSize}`;
-      
-      if (changeType) {
-        url += `&change_type=${changeType}`;
-      }
-      
-      if (name) {
-        url += `&name=${encodeURIComponent(name)}`;
-      }
-      
-      if (sort) {
-        url += `&sort=${sort}`;
-      }
+      const url = `${API_BASE_URL}/comparison/${comparisonId}/functions`;
       
       const response = await fetch(url);
       
@@ -233,37 +226,11 @@ export const fetchFunctionChanges = createAsyncThunk(
 export const fetchStructureChanges = createAsyncThunk(
   'comparison/fetchStructureChanges',
   async (
-    {
-      comparisonId,
-      page = 1,
-      pageSize = 50,
-      changeType,
-      name,
-      sort,
-    }: {
-      comparisonId: string;
-      page?: number;
-      pageSize?: number;
-      changeType?: string;
-      name?: string;
-      sort?: string;
-    },
+    comparisonId: string,
     { rejectWithValue }
   ) => {
     try {
-      let url = `${API_BASE_URL}/comparison/${comparisonId}/structures?page=${page}&page_size=${pageSize}`;
-      
-      if (changeType) {
-        url += `&change_type=${changeType}`;
-      }
-      
-      if (name) {
-        url += `&name=${encodeURIComponent(name)}`;
-      }
-      
-      if (sort) {
-        url += `&sort=${sort}`;
-      }
+      const url = `${API_BASE_URL}/comparison/${comparisonId}/structures`;
       
       const response = await fetch(url);
       
@@ -281,37 +248,11 @@ export const fetchStructureChanges = createAsyncThunk(
 export const fetchMetricChanges = createAsyncThunk(
   'comparison/fetchMetricChanges',
   async (
-    {
-      comparisonId,
-      page = 1,
-      pageSize = 50,
-      function: funcName,
-      metric,
-      sort,
-    }: {
-      comparisonId: string;
-      page?: number;
-      pageSize?: number;
-      function?: string;
-      metric?: string;
-      sort?: string;
-    },
+    comparisonId: string,
     { rejectWithValue }
   ) => {
     try {
-      let url = `${API_BASE_URL}/comparison/${comparisonId}/metrics?page=${page}&page_size=${pageSize}`;
-      
-      if (funcName) {
-        url += `&function=${encodeURIComponent(funcName)}`;
-      }
-      
-      if (metric) {
-        url += `&metric=${encodeURIComponent(metric)}`;
-      }
-      
-      if (sort) {
-        url += `&sort=${sort}`;
-      }
+      const url = `${API_BASE_URL}/comparison/${comparisonId}/metrics`;
       
       const response = await fetch(url);
       
@@ -359,27 +300,23 @@ const comparisonSlice = createSlice({
   name: 'comparison',
   initialState,
   reducers: {
-    selectProject1: (state, action: PayloadAction<string>) => {
-      state.selectedProject1 = action.payload;
-    },
-    selectProject2: (state, action: PayloadAction<string>) => {
-      state.selectedProject2 = action.payload;
-    },
     selectComparison: (state, action: PayloadAction<string>) => {
-      state.selectedComparison = action.payload;
+      state.selectedComparisonId = action.payload;
     },
     selectFunction: (state, action: PayloadAction<string>) => {
-      state.selectedFunction = action.payload;
+      state.selectedFunctionId = action.payload;
     },
     selectStructure: (state, action: PayloadAction<string>) => {
-      state.selectedStructure = action.payload;
+      state.selectedStructureId = action.payload;
     },
     clearSelection: (state) => {
-      state.selectedProject1 = null;
-      state.selectedProject2 = null;
-      state.selectedComparison = null;
-      state.selectedFunction = null;
-      state.selectedStructure = null;
+      state.baseProjectId = null;
+      state.baseVersionId = null;
+      state.targetProjectId = null;
+      state.targetVersionId = null;
+      state.selectedComparisonId = null;
+      state.selectedFunctionId = null;
+      state.selectedStructureId = null;
     },
     clearError: (state) => {
       state.error = null;
@@ -426,7 +363,7 @@ const comparisonSlice = createSlice({
         state.comparisons.push(action.payload);
       }
       // Select the new comparison
-      state.selectedComparison = action.payload.id;
+      state.selectedComparisonId = action.payload.id;
     });
     builder.addCase(createComparison.rejected, (state, action) => {
       state.loading = false;
@@ -491,8 +428,6 @@ const comparisonSlice = createSlice({
 });
 
 export const {
-  selectProject1,
-  selectProject2,
   selectComparison,
   selectFunction,
   selectStructure,
