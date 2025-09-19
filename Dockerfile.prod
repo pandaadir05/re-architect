@@ -1,0 +1,67 @@
+FROM python:3.10-slim as builder
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    wget \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies into a virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy and install requirements
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install the package in development mode
+COPY . .
+RUN pip install -e .
+
+# Final stage
+FROM python:3.10-slim
+
+# Create a non-root user
+RUN useradd -m -u 1000 reuser && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Set working directory and copy application
+WORKDIR /app
+COPY --from=builder /app /app
+RUN chown -R reuser:reuser /app
+
+# Security: Remove unnecessary files, set proper permissions
+RUN rm -rf tests/ docs/ .git/ && \
+    find /app -type d -exec chmod 755 {} \; && \
+    find /app -type f -exec chmod 644 {} \;
+
+# Switch to non-root user
+USER reuser
+
+# Environment setup
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app \
+    LOG_LEVEL=info
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:5000/api/health || exit 1
+
+# Container metadata
+LABEL maintainer="RE-Architect Team" \
+      version="1.0" \
+      description="Binary Analysis and Reverse Engineering Tool"
+
+# Default command
+ENTRYPOINT ["python", "main.py"]

@@ -48,9 +48,15 @@ python main.py --input samples/example.exe --output results/ --config config.yam
 
 For Docker users:
 ```bash
-# Build and run using Docker
+# Build and run using Docker (development)
 docker-compose build
 docker-compose run re-architect --input /app/samples/example.exe --output /app/results/
+
+# For production deployment
+# See DEPLOYMENT.md for complete instructions
+cp .env.prod.template .env.prod
+# Edit .env.prod with your values
+./deploy.sh
 ```
 
 ## 🛠️ Technologies
@@ -71,6 +77,7 @@ docker-compose run re-architect --input /app/samples/example.exe --output /app/r
 - [Web Interface](docs/web_interface.md) - Using the React-based visualization interface
 - [User Manual](docs/user_manual.md) - Complete usage documentation
 - [API Reference](docs/api_reference.md) - Programmatic interfaces for integration
+- [Deployment Guide](DEPLOYMENT.md) - Production deployment instructions
 - [Contributing](CONTRIBUTING.md) - Guidelines for contributing to RE-Architect
 
 ## 📋 Requirements
