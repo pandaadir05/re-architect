@@ -19,9 +19,10 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import React, { useState } from 'react';
+import { ChangeEvent, FC, useState } from 'react';
 import { useAppSelector } from '../../redux/hooks';
-import { ChangeType } from './types';
+import { safeFilter, safeReduce } from '../../utils/typeUtils';
+import { ChangeType, FunctionChange } from './types';
 
 // Color mapping based on change type
 const getChangeTypeColor = (changeType: ChangeType) => {
@@ -49,7 +50,7 @@ const getChangeTypeIcon = (changeType: ChangeType) => {
 /**
  * Component for displaying function changes in a comparison
  */
-const FunctionChangesTable: React.FC<{ 
+const FunctionChangesTable: FC<{ 
   comparisonId: string,
   onViewFunction?: (functionId: string) => void,
   searchQuery?: string
@@ -69,13 +70,13 @@ const FunctionChangesTable: React.FC<{
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (event: ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
   // Filter functions to this comparison and by search query
-  const filteredFunctions = functionChanges.filter(func => {
+  const filteredFunctions = safeFilter(functionChanges, (func: FunctionChange) => {
     // First filter by comparison ID if implemented
     // const matchesComparison = func.comparisonId === comparisonId;
     
@@ -89,17 +90,21 @@ const FunctionChangesTable: React.FC<{
     return /* matchesComparison && */ matchesSearch;
   });
   
-  const displayedFunctions = filteredFunctions
+  const displayedFunctions = (filteredFunctions as FunctionChange[])
     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   // Group functions by change type for statistics
-  const groupedByType = filteredFunctions.reduce<Record<ChangeType, number>>((acc, func) => {
-    if (!acc[func.change_type]) {
-      acc[func.change_type] = 0;
-    }
-    acc[func.change_type]++;
-    return acc;
-  }, {} as Record<ChangeType, number>);
+  const groupedByType = safeReduce(
+    filteredFunctions,
+    (acc: Record<ChangeType, number>, func: FunctionChange) => {
+      if (!acc[func.change_type]) {
+        acc[func.change_type] = 0;
+      }
+      acc[func.change_type]++;
+      return acc;
+    }, 
+    {} as Record<ChangeType, number>
+  );
 
   return (
     <Card elevation={3} sx={{ mb: 4 }}>

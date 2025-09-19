@@ -1,16 +1,10 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { ProjectWithVersions } from '../../components/comparison/models';
+import { FunctionChange, StructureChange } from '../../components/comparison/types';
 import { API_BASE_URL } from '../../services/api';
 
 // Types
-export interface Project {
-  id: string;
-  name: string;
-  binary_path: string;
-  timestamp: string | null;
-  version: string;
-  description: string;
-  tags: string[];
-}
+export type Project = ProjectWithVersions;
 
 export interface Function {
   id: string;
@@ -34,22 +28,6 @@ export interface Structure {
     offset: number;
     size: number;
   }>;
-}
-
-export interface FunctionChange {
-  function_id: string;
-  change_type: 'ADDED' | 'REMOVED' | 'MODIFIED' | 'RENAMED' | 'UNCHANGED';
-  corresponding_id: string | null;
-  function_details?: Function;
-  corresponding_function_details?: Function;
-}
-
-export interface StructureChange {
-  structure_id: string;
-  change_type: 'ADDED' | 'REMOVED' | 'MODIFIED' | 'RENAMED' | 'UNCHANGED';
-  corresponding_id: string | null;
-  structure_details?: Structure;
-  corresponding_structure_details?: Structure;
 }
 
 export interface MetricChange {
@@ -303,6 +281,12 @@ const comparisonSlice = createSlice({
     selectComparison: (state, action: PayloadAction<string>) => {
       state.selectedComparisonId = action.payload;
     },
+    selectProject1: (state, action: PayloadAction<string>) => {
+      state.baseProjectId = action.payload;
+    },
+    selectProject2: (state, action: PayloadAction<string>) => {
+      state.targetProjectId = action.payload;
+    },
     selectFunction: (state, action: PayloadAction<string>) => {
       state.selectedFunctionId = action.payload;
     },
@@ -429,6 +413,8 @@ const comparisonSlice = createSlice({
 
 export const {
   selectComparison,
+  selectProject1,
+  selectProject2,
   selectFunction,
   selectStructure,
   clearSelection,

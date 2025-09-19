@@ -1,7 +1,10 @@
 import { Box, createTheme, CssBaseline, ThemeProvider } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Route, Routes, useLocation } from 'react-router-dom';
+
+// Import AFrameInitializer to ensure A-Frame is loaded globally
+import AFrameInitializer from './components/visualizations/AFrameInitializer';
 
 // Import components
 import Navbar from './components/Navbar';
@@ -22,11 +25,14 @@ import { ThemeContext } from './contexts/ThemeContext';
 import { fetchCurrentUser } from './redux/slices/auth/authSlice';
 import { AppDispatch } from './redux/store';
 
-const App: React.FC = () => {
+const App = (): JSX.Element => {
   // State for theme mode (light/dark)
   const [darkMode, setDarkMode] = useState(true);
   const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
+  
+  // Initialize A-Frame - this ensures AFRAME is available globally
+  const [aframeInitialized, setAframeInitialized] = useState(false);
 
   // Create theme based on mode
   const theme = createTheme({
@@ -65,6 +71,8 @@ const App: React.FC = () => {
     <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        {/* Initialize A-Frame globally */}
+        <AFrameInitializer />
         {isAuthPage ? (
           <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default' }}>
             <Routes>

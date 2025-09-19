@@ -1,14 +1,14 @@
 import { Box, Button, Card, CardContent, FormControl, Grid, InputLabel, MenuItem, Select, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { createComparison, fetchProjects, selectProject1, selectProject2 } from '../../redux/slices/comparisonSlice';
 
 /**
  * Component for selecting two projects to compare
  */
-const ProjectSelector: React.FC = () => {
+const ProjectSelector = () => {
   const dispatch = useAppDispatch();
-  const { projects, selectedProject1, selectedProject2, loading, error } = useAppSelector(
+  const { projects, baseProjectId, targetProjectId, loading, error } = useAppSelector(
     (state) => state.comparison
   );
   
@@ -21,11 +21,11 @@ const ProjectSelector: React.FC = () => {
   }, [dispatch]);
   
   const handleCompare = () => {
-    if (selectedProject1 && selectedProject2) {
+    if (baseProjectId && targetProjectId) {
       dispatch(
         createComparison({
-          project1Id: selectedProject1,
-          project2Id: selectedProject2,
+          project1Id: baseProjectId,
+          project2Id: targetProjectId,
           name: name || undefined,
           description: description || undefined,
         })
@@ -48,7 +48,7 @@ const ProjectSelector: React.FC = () => {
             <FormControl fullWidth margin="normal">
               <InputLabel>Base Project</InputLabel>
               <Select
-                value={selectedProject1 || ''}
+                value={baseProjectId || ''}
                 onChange={(e) => dispatch(selectProject1(e.target.value))}
                 disabled={loading}
                 label="Base Project"
@@ -57,9 +57,9 @@ const ProjectSelector: React.FC = () => {
                   <MenuItem 
                     key={project.id} 
                     value={project.id}
-                    disabled={project.id === selectedProject2}
+                    disabled={project.id === targetProjectId}
                   >
-                    {project.name} (v{project.version})
+                    {project.name} (v{project.versions && project.versions.length > 0 ? project.versions[0].version_name : 'N/A'})
                   </MenuItem>
                 ))}
               </Select>
@@ -76,7 +76,7 @@ const ProjectSelector: React.FC = () => {
             <FormControl fullWidth margin="normal">
               <InputLabel>Target Project</InputLabel>
               <Select
-                value={selectedProject2 || ''}
+                value={targetProjectId || ''}
                 onChange={(e) => dispatch(selectProject2(e.target.value))}
                 disabled={loading}
                 label="Target Project"
@@ -85,9 +85,9 @@ const ProjectSelector: React.FC = () => {
                   <MenuItem 
                     key={project.id} 
                     value={project.id}
-                    disabled={project.id === selectedProject1}
+                    disabled={project.id === baseProjectId}
                   >
-                    {project.name} (v{project.version})
+                    {project.name} (v{project.versions && project.versions.length > 0 ? project.versions[0].version_name : 'N/A'})
                   </MenuItem>
                 ))}
               </Select>
@@ -100,7 +100,7 @@ const ProjectSelector: React.FC = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleCompare}
-                disabled={!selectedProject1 || !selectedProject2 || loading}
+                disabled={!baseProjectId || !targetProjectId || loading}
               >
                 {loading ? 'Comparing...' : 'Compare Projects'}
               </Button>

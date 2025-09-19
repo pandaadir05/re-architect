@@ -22,7 +22,7 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAppSelector } from '../../redux/hooks';
 import { ChangeType, StructureChange } from './types';
 
@@ -50,10 +50,10 @@ const getChangeTypeIcon = (changeType: ChangeType) => {
 };
 
 // Row component for expandable table rows
-const StructureRow: React.FC<{ 
-  structure: StructureChange, 
-  onViewStructure?: (structureId: string) => void 
-}> = ({ structure, onViewStructure }) => {
+const StructureRow = ({ structure, onViewStructure }: {
+  structure: StructureChange,
+  onViewStructure?: (structureId: string) => void
+}) => {
   const [open, setOpen] = useState(false);
   const hasFieldChanges = structure.field_changes && structure.field_changes.length > 0;
 
@@ -140,14 +140,14 @@ const StructureRow: React.FC<{
 /**
  * Component for displaying structure changes in a comparison
  */
-const StructureChangesTable: React.FC<{ 
-  comparisonId: string, 
-  onViewStructure?: (structureId: string) => void,
-  searchQuery?: string
-}> = ({ 
+const StructureChangesTable = ({ 
   comparisonId,
   onViewStructure,
   searchQuery = ''
+}: { 
+  comparisonId: string, 
+  onViewStructure?: (structureId: string) => void,
+  searchQuery?: string
 }) => {
   const { structureChanges } = useAppSelector((state) => state.comparison);
   
@@ -160,7 +160,7 @@ const StructureChangesTable: React.FC<{
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (event: any) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
