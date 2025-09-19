@@ -26,7 +26,7 @@ This will:
 
 Results are saved in multiple formats:
 - JSON files containing detailed analysis data
-- HTML files for easy viewing (if Flask is installed)
+- Interactive web interface for visualization and exploration
 
 To start the visualization server:
 
@@ -34,7 +34,19 @@ To start the visualization server:
 python main.py path/to/binary --serve
 ```
 
-This will launch a web interface at `http://localhost:8000` where you can explore the analysis results.
+This will launch a web interface at `http://localhost:5000` where you can explore the analysis results.
+
+For a more comprehensive visualization experience, you can use the React-based frontend:
+
+```bash
+# Start the backend API server
+make web
+
+# In a separate terminal, start the frontend development server
+make frontend
+```
+
+This will launch the modern React interface at `http://localhost:3000` which provides enhanced visualizations, interactive code exploration, and more intuitive navigation.
 
 ## Command Line Options
 
@@ -106,5 +118,5 @@ Test harnesses are stored in the `output/tests/` directory. Each test includes:
 ## Next Steps
 
 - Check out the [Advanced Usage Guide](advanced_usage.md) for more features
-- Learn about [Customizing Analysis](customization.md) 
+- Learn about [Customizing Analysis](customization.md)
 - See [Integration Examples](integration.md) for using RE-Architect with other tools

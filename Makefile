@@ -1,4 +1,4 @@
-.PHONY: setup clean test lint docker-build docker-run install dev help
+.PHONY: setup clean test lint docker-build docker-run install dev help frontend mock-web
 
 # Set default shell to bash
 SHELL := /bin/bash
@@ -8,6 +8,9 @@ PYTHON := python
 PIP := pip
 PYTEST := pytest
 FLAKE8 := flake8
+
+# Frontend settings
+NPM := npm
 
 # Docker settings
 DOCKER := docker
@@ -26,6 +29,8 @@ help:
 	@echo "docker-build  - Build Docker image"
 	@echo "docker-run    - Run RE-Architect in Docker"
 	@echo "web           - Start the web visualization server"
+	@echo "mock-web      - Start the web visualization server with mock data"
+	@echo "frontend      - Start the React frontend development server"
 	@echo "dev           - Run in development mode"
 
 setup:
@@ -56,6 +61,12 @@ docker-run:
 
 web:
 	$(DOCKER_COMPOSE) up web
+
+mock-web:
+	$(PYTHON) src/visualization/run_mock_server.py
+
+frontend:
+	cd frontend && $(NPM) start
 
 dev:
 	$(PYTHON) main.py $(ARGS)

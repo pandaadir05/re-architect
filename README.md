@@ -68,6 +68,7 @@ docker-compose run re-architect --input /app/samples/example.exe --output /app/r
 
 - [Installation Guide](docs/installation.md) - Detailed setup instructions for different environments
 - [Quick Start Guide](docs/quick_start.md) - Get up and running in minutes
+- [Web Interface](docs/web_interface.md) - Using the React-based visualization interface
 - [User Manual](docs/user_manual.md) - Complete usage documentation
 - [API Reference](docs/api_reference.md) - Programmatic interfaces for integration
 - [Contributing](CONTRIBUTING.md) - Guidelines for contributing to RE-Architect
