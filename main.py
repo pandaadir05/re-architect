@@ -136,8 +136,10 @@ def main():
         
         # Start visualization server if requested
         if args.serve:
-            from src.visualization.server import start_server
-            start_server(results, host="localhost", port=8000)
+            from src.visualization.server import VisualizationServer
+            server = VisualizationServer(host="localhost", port=5000)
+            server.load_results(results)
+            server.start()
         
         return 0
         
