@@ -1,0 +1,3 @@
+"""
+Main RE-Architect package.
+"""

@@ -1,0 +1,122 @@
+# RE-Architect Configuration File
+
+# Decompiler settings
+decompiler:
+  # Default decompiler to use
+  default: ghidra
+  
+  # Ghidra settings
+  ghidra:
+    path: null  # Set this to your Ghidra installation path
+    headless: true
+    timeout: 600  # seconds
+    analyze_all: true
+    analyze_data: true
+  
+  # IDA Pro settings
+  ida:
+    path: null  # Set this to your IDA Pro installation path
+    headless: true
+    timeout: 600  # seconds
+    idc_path: null  # Path to custom IDC script
+  
+  # Binary Ninja settings
+  binary_ninja:
+    path: null  # Set this to your Binary Ninja installation path
+    timeout: 600  # seconds
+    analysis_mode: full  # basic, intermediate, full
+
+# Analysis settings
+analysis:
+  # Static analysis settings
+  static:
+    function_analysis_depth: medium  # basic, medium, deep
+    data_flow_analysis: true
+    control_flow_analysis: true
+    symbolic_execution: false
+    taint_analysis: false
+    string_analysis: true
+    call_graph_analysis: true
+  
+  # Dynamic analysis settings
+  dynamic:
+    enable: false  # Set to true to enable dynamic analysis
+    max_execution_time: 60  # seconds
+    memory_limit: 2048  # MB
+    sandbox_type: container  # none, container, vm
+    record_syscalls: true
+    record_network: true
+    emulation_mode: qemu  # qemu, unicorn, native
+
+# LLM settings (for function summarization)
+llm:
+  enable: true
+  provider: openai  # openai, anthropic, huggingface, local
+  model: gpt-4-turbo  # gpt-4-turbo, claude-3-opus, etc.
+  api_key: null  # Set your API key here or use environment variable
+  max_tokens: 8192
+  temperature: 0.2
+  cache_dir: ./cache/llm
+  streaming: true
+  function_templates:
+    - name: standard
+      prompt: "Analyze this function and provide a summary of its purpose, inputs, outputs, and potential vulnerabilities."
+    - name: security
+      prompt: "Analyze this function for security vulnerabilities such as buffer overflows, use-after-free, and other common issues."
+
+# Data structure recovery settings
+data_structures:
+  recovery_method: hybrid  # static, dynamic, hybrid
+  field_analysis: true
+  pointer_analysis: true
+  array_detection: true
+  type_inference: true
+
+# Test generation settings
+test_generation:
+  sanitizers: [address, undefined, memory, thread]
+  fuzzing_time: 120  # seconds
+  fuzzing_engine: libfuzzer  # libfuzzer, afl++, honggfuzz
+  max_test_cases: 10
+  compiler: clang  # gcc, clang, etc.
+  compiler_flags: [-O0, -g, -fsanitize=address]
+  coverage_threshold: 70  # percent
+
+# Visualization settings
+visualization:
+  server:
+    host: localhost
+    port: 5000
+    debug: false
+    auth_required: false
+  ui:
+    theme: dark  # light, dark
+    show_disassembly: true
+    show_decompiled: true
+    show_graph: true
+    show_data_flow: true
+
+# Output settings
+output:
+  detail_level: full  # basic, standard, full
+  formats: [json, html, markdown]
+  output_dir: ./results
+  reports:
+    generate_pdf: false
+    include_graphs: true
+    include_data_structures: true
+    include_test_cases: true
+
+# Performance settings
+performance:
+  parallelism: auto  # auto, or number of threads
+  memory_limit: 8192  # MB
+  disk_cache: true
+  cache_dir: ./cache
+
+# Logging settings
+logging:
+  level: info  # debug, info, warning, error, critical
+  file: re-architect.log
+  console: true
+  format: "{time} [{level}] {message}"

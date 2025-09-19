@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Redirect output to stderr.
+exec 1>&2
+
+# Check for Python syntax errors or undefined names
+echo "Checking for Python syntax errors..."
+flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+if [ $? -ne 0 ]; then
+    echo "Python syntax errors found. Please fix them before committing."
+    exit 1
+fi
+
+# Run pytest on changed Python files
+python_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.py$')
+if [ -n "$python_files" ]; then
+    echo "Running pytest on changed Python files..."
+    python -m pytest $python_files -v
+    if [ $? -ne 0 ]; then
+        echo "Tests failed. Please fix them before committing."
+        exit 1
+    fi
+fi
+
+# Check for large binary files
+large_files=$(git diff --cached --name-only | xargs du -s 2>/dev/null | awk '$1 > 500 {print $2}')
+if [ -n "$large_files" ]; then
+    echo "Warning: You're trying to commit large files:"
+    echo "$large_files"
+    echo "Consider if these should be tracked in Git or added to .gitignore"
+    read -p "Continue with commit? (y/n) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
+
+exit 0

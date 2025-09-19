@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  re-architect:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/app
+      - binary_samples:/app/samples
+      - results:/app/results
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GHIDRA_PATH=${GHIDRA_PATH:-/opt/ghidra}
+    command: ["--help"] # Default to showing help
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./:/app
+      - results:/app/results
+    environment:
+      - FLASK_APP=src/visualization/server.py
+      - FLASK_ENV=development
+    command: ["python", "-m", "flask", "run", "--host=0.0.0.0"]
+    depends_on:
+      - re-architect
+
+volumes:
+  binary_samples:
+  results:

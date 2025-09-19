@@ -1,0 +1,227 @@
+"""
+Core pipeline module for RE-Architect.
+
+This module defines the main reverse engineering pipeline that coordinates
+the different analysis stages.
+"""
+
+import logging
+import time
+from pathlib import Path
+from typing import Dict, List, Optional, Any
+
+from src.core.binary_loader import BinaryLoader
+from src.core.config import Config
+from src.decompilers.decompiler_factory import DecompilerFactory
+from src.analysis.static_analyzer import StaticAnalyzer
+from src.analysis.dynamic_analyzer import DynamicAnalyzer
+from src.analysis.data_structure_analyzer import DataStructureAnalyzer
+from src.llm.function_summarizer import FunctionSummarizer
+from src.test_generation.test_generator import TestGenerator
+
+logger = logging.getLogger("re-architect.pipeline")
+
+class ReversePipeline:
+    """
+    Main pipeline for the reverse engineering process.
+    
+    This class orchestrates the entire reverse engineering workflow, from binary loading
+    to test harness generation.
+    """
+    
+    def __init__(
+        self,
+        binary_path: Path,
+        output_dir: Path,
+        config: Config,
+        decompiler: str = "auto",
+        generate_tests: bool = False
+    ):
+        """
+        Initialize the reverse engineering pipeline.
+        
+        Args:
+            binary_path: Path to the binary file to analyze
+            output_dir: Directory to store output files
+            config: Configuration object
+            decompiler: Decompiler to use (ghidra, ida, binja, auto)
+            generate_tests: Whether to generate test harnesses
+        """
+        self.binary_path = binary_path
+        self.output_dir = output_dir
+        self.config = config
+        self.decompiler_name = decompiler
+        self.generate_tests = generate_tests
+        
+        self.binary_loader = None
+        self.decompiler = None
+        self.static_analyzer = None
+        self.dynamic_analyzer = None
+        self.data_structure_analyzer = None
+        self.function_summarizer = None
+        self.test_generator = None
+        
+        self.results = {
+            "metadata": {},
+            "functions": {},
+            "data_structures": {},
+            "test_harnesses": {},
+            "performance_metrics": {}
+        }
+    
+    def _initialize_components(self):
+        """Initialize all pipeline components."""
+        logger.info("Initializing pipeline components...")
+        
+        # Initialize binary loader
+        self.binary_loader = BinaryLoader()
+        
+        # Initialize decompiler
+        decompiler_factory = DecompilerFactory()
+        self.decompiler = decompiler_factory.create(self.decompiler_name)
+        
+        # Initialize analyzers
+        self.static_analyzer = StaticAnalyzer(self.config)
+        self.dynamic_analyzer = DynamicAnalyzer(self.config)
+        self.data_structure_analyzer = DataStructureAnalyzer(self.config)
+        
+        # Initialize LLM components if enabled
+        if self.config.use_llm:
+            self.function_summarizer = FunctionSummarizer(self.config)
+        
+        # Initialize test generator if requested
+        if self.generate_tests:
+            self.test_generator = TestGenerator(self.config)
+    
+    def run(self) -> Dict[str, Any]:
+        """
+        Run the complete reverse engineering pipeline.
+        
+        Returns:
+            Dictionary containing all analysis results
+        """
+        logger.info(f"Starting analysis of {self.binary_path}")
+        
+        # Record start time for performance metrics
+        stage_times = {}
+        
+        # Initialize components
+        self._initialize_components()
+        
+        # Load binary
+        start_time = time.time()
+        binary_info = self.binary_loader.load(self.binary_path)
+        stage_times["binary_loading"] = time.time() - start_time
+        
+        # Store binary metadata
+        self.results["metadata"] = {
+            "file_path": str(self.binary_path),
+            "file_size": self.binary_path.stat().st_size,
+            "architecture": binary_info.architecture,
+            "compiler": binary_info.compiler,
+            "entry_point": binary_info.entry_point
+        }
+        
+        # Decompile binary
+        start_time = time.time()
+        decompiled_code = self.decompiler.decompile(binary_info)
+        stage_times["decompilation"] = time.time() - start_time
+        
+        # Perform static analysis
+        start_time = time.time()
+        static_analysis_results = self.static_analyzer.analyze(decompiled_code)
+        stage_times["static_analysis"] = time.time() - start_time
+        
+        # Extract functions and their details
+        self.results["functions"] = static_analysis_results.functions
+        
+        # Analyze data structures
+        start_time = time.time()
+        data_structures = self.data_structure_analyzer.analyze(
+            decompiled_code, 
+            static_analysis_results
+        )
+        stage_times["data_structure_analysis"] = time.time() - start_time
+        
+        # Store data structure information
+        self.results["data_structures"] = data_structures
+        
+        # Generate function summaries with LLM if enabled
+        if self.function_summarizer:
+            start_time = time.time()
+            for func_id, func_info in self.results["functions"].items():
+                summary = self.function_summarizer.summarize(func_info)
+                self.results["functions"][func_id]["summary"] = summary
+            stage_times["function_summarization"] = time.time() - start_time
+        
+        # Generate test harnesses if requested
+        if self.test_generator:
+            start_time = time.time()
+            test_harnesses = self.test_generator.generate(
+                self.results["functions"],
+                self.results["data_structures"]
+            )
+            stage_times["test_generation"] = time.time() - start_time
+            
+            # Store test harnesses
+            self.results["test_harnesses"] = test_harnesses
+        
+        # Store performance metrics
+        self.results["performance_metrics"] = stage_times
+        
+        # Save results to output directory
+        self._save_results()
+        
+        logger.info("Analysis completed successfully")
+        return self.results
+    
+    def _save_results(self):
+        """Save all results to the output directory."""
+        import json
+        
+        # Ensure output directory exists
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Save overview JSON
+        with open(self.output_dir / "results.json", "w") as f:
+            json.dump(self.results, f, indent=2)
+        
+        # Save function summaries
+        functions_dir = self.output_dir / "functions"
+        functions_dir.mkdir(exist_ok=True)
+        
+        for func_id, func_info in self.results["functions"].items():
+            func_file = functions_dir / f"{func_id}.json"
+            with open(func_file, "w") as f:
+                json.dump(func_info, f, indent=2)
+        
+        # Save data structure definitions
+        data_structures_dir = self.output_dir / "data_structures"
+        data_structures_dir.mkdir(exist_ok=True)
+        
+        for struct_id, struct_info in self.results["data_structures"].items():
+            struct_file = data_structures_dir / f"{struct_id}.json"
+            with open(struct_file, "w") as f:
+                json.dump(struct_info, f, indent=2)
+        
+        # Save test harnesses if available
+        if self.results["test_harnesses"]:
+            tests_dir = self.output_dir / "tests"
+            tests_dir.mkdir(exist_ok=True)
+            
+            for test_id, test_info in self.results["test_harnesses"].items():
+                # Save test source code
+                test_file = tests_dir / f"{test_id}.c"  # Using C as default
+                with open(test_file, "w") as f:
+                    f.write(test_info["source_code"])
+                
+                # Save test metadata
+                test_meta_file = tests_dir / f"{test_id}_meta.json"
+                with open(test_meta_file, "w") as f:
+                    json.dump(
+                        {k: v for k, v in test_info.items() if k != "source_code"}, 
+                        f, 
+                        indent=2
+                    )
+        
+        logger.info(f"Results saved to {self.output_dir}")

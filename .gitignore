@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+.env
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# Project specific
+output/
+cache/
+results/
+samples/
+*.log
+*.dll
+*.exe
+*.obj
+*.o
+*.bin
+*.elf
+*.dylib
+*.so
+*.so.*
+*.a
+*.ko
+
+# Config with API keys
+config.local.yaml
+
+# Ghidra project files
+*.gpr
+*.rep
+
+# IDA Pro files
+*.id0
+*.id1
+*.id2
+*.idb
+*.i64
+*.nam
+*.til
+
+# Binary Ninja files
+*.bndb
+*.bndb.tmp
+
+# Docker volumes
+docker-volumes/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
