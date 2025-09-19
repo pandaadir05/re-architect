@@ -1,5 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import analysisReducer from './slices/analysisSlice';
+import authReducer from './slices/auth';
+import comparisonReducer from './slices/comparisonSlice';
 import uiReducer from './slices/uiSlice';
 import visualizationReducer from './slices/visualizationSlice';
 
@@ -8,6 +10,8 @@ export const store = configureStore({
     analysis: analysisReducer,
     ui: uiReducer,
     visualization: visualizationReducer,
+    auth: authReducer,
+    comparison: comparisonReducer,
   },
 });
 
