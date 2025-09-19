@@ -10,7 +10,7 @@ import os
 import sys
 import webbrowser
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union, List
 
 logger = logging.getLogger("re-architect.visualization.server")
 
@@ -22,7 +22,7 @@ class VisualizationServer:
     through a web interface.
     """
     
-    def __init__(self, host: str = "localhost", port: int = 8000):
+    def __init__(self, host: str = "localhost", port: int = 5000):
         """
         Initialize the visualization server.
         
@@ -60,37 +60,96 @@ class VisualizationServer:
         try:
             # Create Flask app
             from flask import Flask, render_template, jsonify, request, send_from_directory
+            import flask_cors
             
             # Create app
-            self.app = Flask("re-architect-viz")
+            self.app = Flask("re-architect-viz", 
+                             static_folder=os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'build'),
+                             static_url_path='')
             
-            # Define routes
-            @self.app.route('/')
-            def index():
-                return render_template('index.html', binary_name=self.results["metadata"]["file_path"])
+            # Enable CORS for development
+            flask_cors.CORS(self.app)
             
+            # API routes
             @self.app.route('/api/metadata')
             def metadata():
                 return jsonify(self.results["metadata"])
             
             @self.app.route('/api/functions')
             def functions():
-                return jsonify(self.results["functions"])
+                return jsonify(self.results.get("functions", {}))
             
             @self.app.route('/api/function/<func_id>')
             def function_details(func_id):
-                func_id = int(func_id)
-                if func_id in self.results["functions"]:
-                    return jsonify(self.results["functions"][func_id])
+                try:
+                    func_id_int = int(func_id)
+                    if str(func_id_int) in self.results["functions"]:
+                        return jsonify(self.results["functions"][str(func_id_int)])
+                except ValueError:
+                    # Try with string ID
+                    if func_id in self.results["functions"]:
+                        return jsonify(self.results["functions"][func_id])
                 return jsonify({"error": "Function not found"}), 404
             
             @self.app.route('/api/data_structures')
             def data_structures():
-                return jsonify(self.results["data_structures"])
+                return jsonify(self.results.get("data_structures", {}))
+            
+            @self.app.route('/api/data_structure/<struct_id>')
+            def data_structure_details(struct_id):
+                if struct_id in self.results.get("data_structures", {}):
+                    return jsonify(self.results["data_structures"][struct_id])
+                return jsonify({"error": "Data structure not found"}), 404
             
             @self.app.route('/api/test_harnesses')
             def test_harnesses():
-                return jsonify(self.results["test_harnesses"])
+                return jsonify(self.results.get("test_harnesses", {}))
+            
+            @self.app.route('/api/test_harness/<func_id>')
+            def test_harness_details(func_id):
+                if func_id in self.results.get("test_harnesses", {}):
+                    return jsonify(self.results["test_harnesses"][func_id])
+                return jsonify({"error": "Test harness not found"}), 404
+                
+            @self.app.route('/api/analysis/<analysis_id>')
+            def analysis_details(analysis_id):
+                if analysis_id in self.results.get("analyses", {}):
+                    return jsonify(self.results["analyses"][analysis_id])
+                return jsonify({"error": "Analysis not found"}), 404
+                
+            @self.app.route('/api/performance')
+            def performance():
+                return jsonify(self.results.get("performance_metrics", {}))
+                
+            # New API for summary information
+            @self.app.route('/api/summary')
+            def summary():
+                total_functions = len(self.results.get("functions", {}))
+                total_data_structures = len(self.results.get("data_structures", {}))
+                total_tests = len(self.results.get("test_harnesses", {}))
+                
+                # Count vulnerabilities if they exist
+                vulnerabilities = []
+                for func_id, func_data in self.results.get("functions", {}).items():
+                    if "vulnerabilities" in func_data:
+                        vulnerabilities.extend(func_data["vulnerabilities"])
+                
+                return jsonify({
+                    "total_functions": total_functions,
+                    "total_data_structures": total_data_structures,
+                    "total_tests": total_tests,
+                    "total_vulnerabilities": len(vulnerabilities),
+                    "binary_name": os.path.basename(self.results.get("metadata", {}).get("file_path", "unknown")),
+                    "analysis_time": sum(self.results.get("performance_metrics", {}).values())
+                })
+            
+            # Serve React frontend
+            @self.app.route('/', defaults={'path': ''})
+            @self.app.route('/<path:path>')
+            def serve(path):
+                if path and os.path.exists(os.path.join(self.app.static_folder, path)):
+                    return send_from_directory(self.app.static_folder, path)
+                return send_from_directory(self.app.static_folder, 'index.html')
             
             # Start server
             url = f"http://{self.host}:{self.port}"
@@ -99,11 +158,11 @@ class VisualizationServer:
             if open_browser:
                 webbrowser.open(url)
             
-            self.app.run(host=self.host, port=self.port)
+            self.app.run(host=self.host, port=self.port, debug=False)
             
         except ImportError:
-            logger.error("Flask not installed. Please install with 'pip install flask'")
-            raise RuntimeError("Flask not installed. Please install with 'pip install flask'")
+            logger.error("Flask not installed. Please install with 'pip install flask flask-cors'")
+            raise RuntimeError("Flask not installed. Please install with 'pip install flask flask-cors'")
         except Exception as e:
             logger.error(f"Error starting visualization server: {e}")
             raise RuntimeError(f"Error starting visualization server: {e}")

@@ -21,6 +21,7 @@ transformers>=4.21.0
 
 # Visualization
 flask>=2.1.0
+flask-cors>=3.0.10
 plotly>=5.8.0
 
 # Testing

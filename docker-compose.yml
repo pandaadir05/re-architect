@@ -15,6 +15,20 @@ services:
       - GHIDRA_PATH=${GHIDRA_PATH:-/opt/ghidra}
     command: ["--help"] # Default to showing help
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:5000/api
+    ports:
+      - "3000:3000"
+    command: ["npm", "start"]
+
   web:
     build:
       context: .
@@ -26,7 +40,7 @@ services:
       - results:/app/results
     environment:
       - FLASK_APP=src/visualization/server.py
-      - FLASK_ENV=development
+      - FLASK_DEBUG=1
     command: ["python", "-m", "flask", "run", "--host=0.0.0.0"]
     depends_on:
       - re-architect
