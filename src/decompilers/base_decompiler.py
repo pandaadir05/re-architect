@@ -13,6 +13,70 @@ from src.core.binary_loader import BinaryInfo
 
 logger = logging.getLogger("re-architect.decompilers.base")
 
+class DecompiledFunction:
+    """
+    Container for a decompiled function.
+    
+    This class represents a single decompiled function with its code and metadata.
+    """
+    
+    def __init__(self, address: int, name: str, code: str, signature: str = None):
+        """
+        Initialize decompiled function.
+        
+        Args:
+            address: Function start address
+            name: Function name
+            code: Decompiled function code
+            signature: Function signature if available
+        """
+        self.address = address
+        self.name = name
+        self.code = code
+        self.signature = signature
+        self.calls = []  # List of functions called by this function
+        self.called_by = []  # List of functions that call this function
+        self.metadata = {}  # Additional metadata
+        
+    def add_call(self, target_address: int, target_name: str):
+        """
+        Add a function call.
+        
+        Args:
+            target_address: Address of called function
+            target_name: Name of called function
+        """
+        self.calls.append((target_address, target_name))
+        
+    def add_called_by(self, source_address: int, source_name: str):
+        """
+        Add a function that calls this function.
+        
+        Args:
+            source_address: Address of calling function
+            source_name: Name of calling function
+        """
+        self.called_by.append((source_address, source_name))
+        
+    def add_metadata(self, key: str, value):
+        """
+        Add metadata to the function.
+        
+        Args:
+            key: Metadata key
+            value: Metadata value
+        """
+        self.metadata[key] = value
+        
+    def __str__(self) -> str:
+        """
+        String representation of the function.
+        
+        Returns:
+            Summary string
+        """
+        return f"DecompiledFunction({self.name} @ {hex(self.address)})"
+
 class DecompiledCode:
     """
     Container for decompiled code and related information.

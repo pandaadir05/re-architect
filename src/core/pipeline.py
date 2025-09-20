@@ -21,7 +21,7 @@ from src.test_generation.test_generator import TestGenerator
 
 logger = logging.getLogger("re-architect.pipeline")
 
-class ReversePipeline:
+class REPipeline:
     """
     Main pipeline for the reverse engineering process.
     
@@ -29,14 +29,144 @@ class ReversePipeline:
     to test harness generation.
     """
     
-    def __init__(
-        self,
-        binary_path: Path,
-        output_dir: Path,
-        config: Config,
-        decompiler: str = "auto",
-        generate_tests: bool = False
-    ):
+    def __init__(self, config: Config):
+        """
+        Initialize the reverse engineering pipeline.
+        
+        Args:
+            config: Configuration object
+        """
+        self.config = config
+        # Other fields will be initialized when analyze() is called
+        self.binary_path = None
+        self.output_dir = None
+        self.decompiler_name = "auto"
+        self.generate_tests = False
+        
+        self.binary_loader = None
+        self.decompiler = None
+        self.static_analyzer = None
+        self.dynamic_analyzer = None
+        self.data_structure_analyzer = None
+        self.function_summarizer = None
+        self.test_generator = None
+        
+        self.results = {
+            "metadata": {},
+            "functions": {},
+            "data_structures": {},
+            "test_harnesses": {},
+            "performance_metrics": {}
+        }
+    
+    def analyze(self, binary_path, output_dir=None, decompiler="auto", generate_tests=False):
+        """
+        Analyze a binary file.
+        
+        Args:
+            binary_path: Path to the binary file to analyze
+            output_dir: Directory to store output files, defaults to a directory next to the binary
+            decompiler: Decompiler to use (ghidra, ida, binja, auto)
+            generate_tests: Whether to generate test harnesses
+            
+        Returns:
+            Dictionary containing analysis results
+        """
+        # Convert paths
+        self.binary_path = Path(binary_path)
+        if output_dir:
+            self.output_dir = Path(output_dir)
+        else:
+            # Default to a directory next to the binary
+            self.output_dir = self.binary_path.parent / f"{self.binary_path.stem}_analysis"
+            
+        self.decompiler_name = decompiler
+        self.generate_tests = generate_tests
+        
+        # Run the pipeline
+        return self._run()
+        
+    def _run(self) -> Dict[str, Any]:
+        """
+        Internal method to run the pipeline after parameters are set.
+        
+        Returns:
+            Dictionary containing analysis results
+        """
+        logger.info(f"Starting analysis of {self.binary_path}")
+        
+        # Record start time for performance metrics
+        stage_times = {}
+        
+        # Initialize components
+        self._initialize_components()
+        
+        # Load binary
+        start_time = time.time()
+        binary_info = self.binary_loader.load(self.binary_path)
+        stage_times["binary_loading"] = time.time() - start_time
+        
+        # Store binary metadata
+        self.results["metadata"] = {
+            "file_path": str(self.binary_path),
+            "file_size": self.binary_path.stat().st_size,
+            "architecture": binary_info.architecture,
+            "compiler": binary_info.compiler,
+            "entry_point": binary_info.entry_point
+        }
+        
+        # Decompile binary
+        start_time = time.time()
+        decompiled_code = self.decompiler.decompile(binary_info)
+        stage_times["decompilation"] = time.time() - start_time
+        
+        # Perform static analysis
+        start_time = time.time()
+        static_analysis_results = self.static_analyzer.analyze(decompiled_code)
+        stage_times["static_analysis"] = time.time() - start_time
+        
+        # Extract functions and their details
+        self.results["functions"] = static_analysis_results.functions
+        
+        # Analyze data structures
+        start_time = time.time()
+        data_structures = self.data_structure_analyzer.analyze(
+            decompiled_code, 
+            static_analysis_results
+        )
+        stage_times["data_structure_analysis"] = time.time() - start_time
+        
+        # Store data structure information
+        self.results["data_structures"] = data_structures
+        
+        # Generate function summaries with LLM if enabled
+        if self.function_summarizer:
+            start_time = time.time()
+            for func_id, func_info in self.results["functions"].items():
+                summary = self.function_summarizer.summarize(func_info)
+                self.results["functions"][func_id]["summary"] = summary
+            stage_times["function_summarization"] = time.time() - start_time
+        
+        # Generate test harnesses if requested
+        if self.test_generator:
+            start_time = time.time()
+            test_harnesses = self.test_generator.generate(
+                self.results["functions"],
+                self.results["data_structures"]
+            )
+            stage_times["test_generation"] = time.time() - start_time
+            
+            # Store test harnesses
+            self.results["test_harnesses"] = test_harnesses
+        
+        # Store performance metrics
+        self.results["performance_metrics"] = stage_times
+        
+        # Save results to output directory
+        self._save_results()
+        
+        logger.info("Analysis completed successfully")
+        return self.results
         """
         Initialize the reverse engineering pipeline.
         

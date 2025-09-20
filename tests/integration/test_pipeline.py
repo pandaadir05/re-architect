@@ -76,10 +76,41 @@ class TestPipelineIntegration:
         
     def test_pipeline_analysis(self, pipeline, mock_binary_path, monkeypatch):
         # Mock the analysis components to avoid actual execution
+        # Create a class with the expected properties to mock StaticAnalyzer's return value
+        class MockAnalysisResults:
+            def __init__(self):
+                self.functions = {'main': {'name': 'main', 'code': 'int main() { return 0; }'}}
+        
+        # Mock the analyze method to return our mock object
         import src.analysis.static_analyzer
         monkeypatch.setattr(src.analysis.static_analyzer.StaticAnalyzer,
                            'analyze',
-                           lambda self, binary, decompiled: {'functions': ['main'], 'data_structures': []})
+                           lambda self, decompiled: MockAnalysisResults())
+                           
+        # Mock the data structure analyzer
+        import src.analysis.data_structure_analyzer
+        monkeypatch.setattr(src.analysis.data_structure_analyzer.DataStructureAnalyzer,
+                           'analyze',
+                           lambda self, decompiled, static_analysis: {})
+                           
+        # Mock BinaryLoader load method to return a simple dict
+        import src.core.binary_loader
+        
+        class MockBinaryInfo:
+            def __init__(self):
+                self.path = mock_binary_path
+                self.architecture = "x86_64"
+                self.compiler = "gcc"
+                self.entry_point = 0x1000
+        
+        monkeypatch.setattr(src.core.binary_loader.BinaryLoader,
+                           'load',
+                           lambda self, path: MockBinaryInfo())
+                           
+        # Mock _save_results to do nothing
+        monkeypatch.setattr(src.core.pipeline.REPipeline,
+                          '_save_results',
+                          lambda self: None)
                            
         import src.llm.function_summarizer
         monkeypatch.setattr(src.llm.function_summarizer.FunctionSummarizer,

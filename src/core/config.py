@@ -85,15 +85,19 @@ class Config:
         }
     }
     
-    def __init__(self, config_data: Dict[str, Any] = None):
+    def __init__(self, config_data: Union[Dict[str, Any], str, Path] = None):
         """
         Initialize configuration with provided data or defaults.
         
         Args:
-            config_data: Dictionary containing configuration values
+            config_data: Dictionary containing configuration values or path to config file
         """
         # Start with default configuration
         self._config = self.DEFAULT_CONFIG.copy()
+        
+        # If config_data is a string or Path, assume it's a file path and load it
+        if isinstance(config_data, (str, Path)):
+            config_data = self._load_config_file(config_data)
         
         # Update with provided configuration if available
         if config_data:
@@ -101,6 +105,38 @@ class Config:
         
         # Flag to track if LLM is enabled
         self.use_llm = self._config["llm"]["enable"]
+        
+    def _load_config_file(self, config_path: Union[str, Path]) -> Dict[str, Any]:
+        """
+        Load configuration from a YAML file.
+        
+        Args:
+            config_path: Path to the configuration file
+            
+        Returns:
+            Dictionary containing the loaded configuration
+            
+        Raises:
+            FileNotFoundError: If the configuration file doesn't exist
+            yaml.YAMLError: If the configuration file contains invalid YAML
+        """
+        config_path = Path(config_path)
+        
+        # If file doesn't exist, return empty dict
+        if not config_path.exists():
+            logger.warning(f"Configuration file not found: {config_path}")
+            return {}
+        
+        try:
+            with open(config_path, "r") as f:
+                config_data = yaml.safe_load(f)
+            
+            logger.info(f"Loaded configuration from {config_path}")
+            return config_data or {}
+            
+        except yaml.YAMLError as e:
+            logger.error(f"Error parsing configuration file: {e}")
+            raise
     
     @classmethod
     def from_file(cls, config_path: Union[str, Path]) -> "Config":
