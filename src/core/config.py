@@ -21,6 +21,14 @@ class Config:
     
     # Default configuration values
     DEFAULT_CONFIG = {
+        "auth": {
+            "jwt_secret_key": "change-this-in-production",
+            "jwt_algorithm": "HS256",
+            "jwt_expiration_delta": 86400,  # seconds (24 hours)
+            "token_location": ["headers"],
+            "enable_registration": True,
+            "default_role": "analyst"
+        },
         "decompiler": {
             "ghidra": {
                 "path": None,

@@ -70,6 +70,18 @@ class VisualizationServer:
             # Enable CORS for development
             flask_cors.CORS(self.app)
             
+            # Register authentication routes
+            from src.auth import auth_bp
+            self.app.register_blueprint(auth_bp, url_prefix='/api/auth')
+            
+            # Register comparison routes
+            from src.comparison.routes import comparison_bp
+            self.app.register_blueprint(comparison_bp, url_prefix='/api/comparison')
+            
+            # Setup request logging
+            from src.auth.logging_middleware import RequestLogger
+            RequestLogger(self.app)
+            
             # API routes
             @self.app.route('/api/metadata')
             def metadata():

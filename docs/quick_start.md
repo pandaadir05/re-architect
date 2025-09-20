@@ -36,17 +36,7 @@ python main.py path/to/binary --serve
 
 This will launch a web interface at `http://localhost:5000` where you can explore the analysis results.
 
-For a more comprehensive visualization experience, you can use the React-based frontend:
-
-```bash
-# Start the backend API server
-make web
-
-# In a separate terminal, start the frontend development server
-make frontend
-```
-
-This will launch the modern React interface at `http://localhost:3000` which provides enhanced visualizations, interactive code exploration, and more intuitive navigation.
+The web interface provides visualization capabilities for exploring the analysis results.
 
 ## Command Line Options
 

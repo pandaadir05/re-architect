@@ -4,7 +4,7 @@ This document describes the web-based user interface for RE-Architect, which pro
 
 ## Overview
 
-RE-Architect's web interface consists of a Flask backend serving a React frontend. The interface provides a comprehensive view of the binary analysis results, including:
+RE-Architect's web interface consists of a Flask backend that provides a comprehensive view of the binary analysis results, including:
 
 - Dashboard with summary statistics
 - Function browser and detailed views
@@ -14,10 +14,7 @@ RE-Architect's web interface consists of a Flask backend serving a React fronten
 
 ## Architecture
 
-The web interface is composed of two main components:
-
-1. **Backend**: A Flask server (`src/visualization/server.py`) that serves the React application and provides REST API endpoints for accessing analysis data.
-2. **Frontend**: A React application built with TypeScript and Material-UI that provides an intuitive user interface for exploring analysis results.
+The web interface is based on a Flask server (`src/visualization/server.py`) that provides REST API endpoints for accessing analysis data.
 
 ## Backend API Endpoints
 
@@ -34,18 +31,14 @@ The Flask server provides the following API endpoints:
 - `/api/performance`: Returns performance metrics of the analysis
 - `/api/summary`: Returns summary statistics of the analysis
 
-## Frontend Components
+## Web Interface Components
 
-The React frontend is organized into the following components:
+The web interface provides the following views:
 
-- **App**: Main application component that sets up routing and global state
-- **Navbar**: Top navigation bar with application controls
-- **Sidebar**: Navigation sidebar for accessing different parts of the application
 - **Dashboard**: Overview page with summary statistics and charts
-- **BinaryAnalysis**: Page for exploring the binary structure and properties
-- **FunctionView**: Detailed view of a specific function with decompiled code and summaries
-- **DataStructureView**: Visualization of data structures and their relationships
-- **TestHarness**: Page for managing and running generated test harnesses
+- **Function Browser**: View and explore identified functions
+- **Data Structure Explorer**: Visualization of data structures and their relationships
+- **Test Management**: Interface for managing and running generated test harnesses
 - **Settings**: Configuration options for the application
 
 ## Getting Started
@@ -72,27 +65,15 @@ make mock-web
 python src/visualization/run_mock_server.py
 ```
 
-### Running the Frontend in Development Mode
-
-To run the frontend in development mode:
-
-```bash
-# Using make
-make frontend
-
-# Or directly
-cd frontend && npm start
-```
-
 ### Docker Deployment
 
-For a complete deployment with both backend and frontend:
+For deployment using Docker:
 
 ```bash
 docker-compose up
 ```
 
-This will start both the Flask backend and the React frontend, with the frontend accessible at `http://localhost:3000` and the API at `http://localhost:5000/api`.
+This will start the Flask backend server, with the web interface accessible at `http://localhost:5000`.
 
 ## Screenshots
 
@@ -110,7 +91,6 @@ Function view showing decompiled code, summary, and call graph
 
 To modify the web interface:
 
-1. Backend changes should be made in `src/visualization/server.py`
-2. Frontend changes should be made in the `frontend/` directory
-3. Run tests to ensure changes don't break existing functionality
-4. Use the mock server for rapid development without needing full binary analysis
+1. Changes should be made in `src/visualization/server.py` and related files
+2. Run tests to ensure changes don't break existing functionality
+3. Use the mock server for rapid development without needing full binary analysis
