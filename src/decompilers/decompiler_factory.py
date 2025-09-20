@@ -23,6 +23,21 @@ class DecompilerFactory:
     requested decompiler name or binary information.
     """
     
+    def get_decompiler(self, decompiler_name: str = "auto") -> BaseDecompiler:
+        """
+        Get a decompiler instance.
+        
+        Args:
+            decompiler_name: Name of the decompiler to create (ghidra, ida, binja, auto)
+            
+        Returns:
+            Initialized decompiler instance
+            
+        Raises:
+            ValueError: If the requested decompiler is not supported
+        """
+        return self.create(decompiler_name)
+    
     def create(self, decompiler_name: str = "auto") -> BaseDecompiler:
         """
         Create a decompiler instance.

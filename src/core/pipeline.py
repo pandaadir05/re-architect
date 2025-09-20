@@ -167,21 +167,6 @@ class REPipeline:
         
         logger.info("Analysis completed successfully")
         return self.results
-        """
-        Initialize the reverse engineering pipeline.
-        
-        Args:
-            binary_path: Path to the binary file to analyze
-            output_dir: Directory to store output files
-            config: Configuration object
-            decompiler: Decompiler to use (ghidra, ida, binja, auto)
-            generate_tests: Whether to generate test harnesses
-        """
-        self.binary_path = binary_path
-        self.output_dir = output_dir
-        self.config = config
-        self.decompiler_name = decompiler
-        self.generate_tests = generate_tests
         
         self.binary_loader = None
         self.decompiler = None

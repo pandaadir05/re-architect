@@ -83,6 +83,9 @@ class BinaryLoader:
         """Initialize the binary loader."""
         # Check for available tools
         self._check_tools()
+        
+        # Define supported binary formats
+        self.supported_formats = ["elf", "pe", "macho"]
     
     def _check_tools(self) -> None:
         """Check for available binary analysis tools."""
