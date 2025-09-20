@@ -1,6 +1,6 @@
 # RE-Architect
 
-[![Build Status](https://github.com/yourusername/re-architect/workflows/RE-Architect%20CI/badge.svg)](https://github.com/yourusername/re-architect/actions)
+[![Build Status](https://github.com/pandaadir05/re-architect/workflows/RE-Architect%20CI/badge.svg)](https://github.com/pandaadir05/re-architect/actions)
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -33,7 +33,7 @@ RE-Architect consists of several integrated components working together to provi
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/re-architect.git
+git clone https://github.com/pandaadir05/re-architect.git
 cd re-architect
 
 # Install dependencies
