@@ -216,7 +216,8 @@ import java.util.*;
 import com.google.gson.*;
 
 public class ExportDecompiledCode extends GhidraScript {{
-    private static final String OUTPUT_DIR = "{output_dir.replace('\\\\', '/')}";
+    private static final String OUTPUT_DIR = "{output_dir.replace(os.sep, '/')}";
+    
     
     @Override
     public void run() throws Exception {{
