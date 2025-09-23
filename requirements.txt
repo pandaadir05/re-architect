@@ -13,6 +13,9 @@ numpy>=1.22.0
 pandas>=1.4.0
 scikit-learn>=1.1.0
 
+# Web visualization
+flask>=2.3.0
+
 # LLM integration
 openai>=0.27.0
 anthropic>=0.3.0
