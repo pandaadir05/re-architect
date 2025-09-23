@@ -12,6 +12,7 @@ from src.decompilers.base_decompiler import BaseDecompiler
 from src.decompilers.ghidra_decompiler import GhidraDecompiler
 from src.decompilers.ida_decompiler import IDADecompiler
 from src.decompilers.binary_ninja_decompiler import BinaryNinjaDecompiler
+from src.decompilers.mock_decompiler import MockDecompiler
 
 logger = logging.getLogger("re-architect.decompilers.factory")
 
@@ -62,6 +63,9 @@ class DecompilerFactory:
         elif decompiler_name == "binja" or decompiler_name == "binary_ninja":
             logger.info("Creating Binary Ninja decompiler")
             return BinaryNinjaDecompiler()
+        elif decompiler_name == "mock":
+            logger.info("Creating Mock decompiler for testing")
+            return MockDecompiler()
         elif decompiler_name == "auto":
             # We'll pick one based on availability later when we have binary info
             logger.info("Creating auto-selected decompiler (will choose when binary is available)")

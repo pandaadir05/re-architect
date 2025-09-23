@@ -52,9 +52,9 @@ def parse_args():
     parser.add_argument(
         "--decompiler", 
         type=str, 
-        choices=["ghidra", "ida", "binja", "auto"],
-        default="auto",
-        help="Decompiler to use (default: auto)"
+        choices=["ghidra", "ida", "binja", "mock", "auto"],
+        default=None,
+        help="Decompiler to use (default: from config file or auto)"
     )
     
     parser.add_argument(
@@ -118,6 +118,14 @@ def main():
     if args.no_llm:
         config.disable_llm()
     
+    # Determine which decompiler to use
+    decompiler_name = args.decompiler
+    if decompiler_name is None:
+        # Use decompiler from config file
+        decompiler_name = config.get("decompiler.default", "auto")
+    
+    logger.info(f"Using decompiler: {decompiler_name}")
+    
     try:
         # Initialize and run the pipeline
         pipeline = ReversePipeline(config)
@@ -125,7 +133,7 @@ def main():
         results = pipeline.analyze(
             binary_path=binary_path,
             output_dir=output_dir,
-            decompiler=args.decompiler,
+            decompiler=decompiler_name,
             generate_tests=args.generate_tests
         )
         

@@ -110,8 +110,8 @@ class ReversePipeline:
         self.results["metadata"] = {
             "file_path": str(self.binary_path),
             "file_size": self.binary_path.stat().st_size,
-            "architecture": binary_info.architecture,
-            "compiler": binary_info.compiler,
+            "architecture": binary_info.architecture.value if hasattr(binary_info.architecture, 'value') else str(binary_info.architecture),
+            "compiler": binary_info.compiler.value if hasattr(binary_info.compiler, 'value') else str(binary_info.compiler),
             "entry_point": binary_info.entry_point
         }
         
@@ -232,8 +232,8 @@ class ReversePipeline:
         self.results["metadata"] = {
             "file_path": str(self.binary_path),
             "file_size": self.binary_path.stat().st_size,
-            "architecture": binary_info.architecture,
-            "compiler": binary_info.compiler,
+            "architecture": binary_info.architecture.value if hasattr(binary_info.architecture, 'value') else str(binary_info.architecture),
+            "compiler": binary_info.compiler.value if hasattr(binary_info.compiler, 'value') else str(binary_info.compiler),
             "entry_point": binary_info.entry_point
         }
         
