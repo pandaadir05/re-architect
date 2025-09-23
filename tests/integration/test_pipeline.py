@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 # Import necessary components for integration testing
-from src.core.pipeline import REPipeline
+from src.core.pipeline import ReversePipeline
 from src.core.config import Config
 
 
@@ -67,7 +67,7 @@ class TestPipelineIntegration:
         
         # Create pipeline with config
         config = Config(temp_config_file)
-        pipeline = REPipeline(config)
+        pipeline = ReversePipeline(config)
         return pipeline
     
     def test_pipeline_initialization(self, pipeline):
@@ -108,7 +108,7 @@ class TestPipelineIntegration:
                            lambda self, path: MockBinaryInfo())
                            
         # Mock _save_results to do nothing
-        monkeypatch.setattr(src.core.pipeline.REPipeline,
+        monkeypatch.setattr(src.core.pipeline.ReversePipeline,
                           '_save_results',
                           lambda self: None)
                            
