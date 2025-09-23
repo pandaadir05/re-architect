@@ -21,7 +21,7 @@ from src.test_generation.test_generator import TestGenerator
 
 logger = logging.getLogger("re-architect.pipeline")
 
-class REPipeline:
+class ReversePipeline:
     """
     Main pipeline for the reverse engineering process.
     

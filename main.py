@@ -120,15 +120,14 @@ def main():
     
     try:
         # Initialize and run the pipeline
-        pipeline = ReversePipeline(
+        pipeline = ReversePipeline(config)
+        
+        results = pipeline.analyze(
             binary_path=binary_path,
             output_dir=output_dir,
-            config=config,
             decompiler=args.decompiler,
             generate_tests=args.generate_tests
         )
-        
-        results = pipeline.run()
         
         # Output processing time
         elapsed_time = time.time() - start_time
