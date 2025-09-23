@@ -217,7 +217,8 @@ class IDADecompiler(BaseDecompiler):
         """
         script_path = os.path.join(script_dir, "export_decompiled.py")
         
-        script_content = f'''
+        # Generate IDAPython script content
+        script_template = '''
 import idaapi
 import idautils
 import idc
@@ -305,12 +306,12 @@ def export_functions():
     for func_addr in idautils.Functions():
         func_name = idc.get_func_name(func_addr)
         if not func_name:
-            func_name = f"sub_{func_addr:X}"
+            func_name = "sub_" + format(func_addr, 'X')
         
-        print(f"Processing function: {{func_name}} at 0x{{func_addr:X}}")
+        print("Processing function: " + func_name + " at 0x" + format(func_addr, 'X'))
         
         func_info = {{
-            "address": f"0x{{func_addr:X}}",
+            "address": "0x" + format(func_addr, 'X'),
             "name": func_name,
             "start": func_addr,
             "end": idc.get_func_attr(func_addr, idc.FUNCATTR_END),
@@ -336,7 +337,7 @@ def export_functions():
                 for i in range(func_details.size()):
                     param = func_details[i]
                     param_info = {{
-                        "name": param.name if param.name else f"arg_{i}",
+                        "name": param.name if param.name else "arg_" + str(i),
                         "type": str(param.type)
                     }}
                     params.append(param_info)
@@ -348,7 +349,7 @@ def export_functions():
             ref_name = idc.get_func_name(ref)
             if ref_name:
                 calls.append({{
-                    "address": f"0x{{ref:X}}",
+                    "address": "0x" + format(ref, 'X'),
                     "name": ref_name
                 }})
         func_info["calls"] = calls
@@ -363,7 +364,7 @@ def export_functions():
                 
                 # Save to individual file
                 safe_name = func_name.replace(":", "_").replace("?", "_")
-                func_file = os.path.join(functions_dir, f"{{safe_name}}.c")
+                func_file = os.path.join(functions_dir, safe_name + ".c")
                 with open(func_file, "w") as f:
                     f.write(decompiled_code)
             else:
@@ -375,7 +376,7 @@ def export_functions():
         functions.append(func_info)
         count += 1
     
-    print(f"Processed {{count}} functions")
+    print("Processed " + str(count) + " functions")
     
     # Write all functions info
     with open(os.path.join(OUTPUT_DIR, "functions.json"), "w") as f:
@@ -390,14 +391,14 @@ def export_strings():
     # Get all strings
     for string_addr in idautils.Strings():
         string_info = {{
-            "address": f"0x{{string_addr.ea:X}}",
+            "address": "0x" + format(string_addr.ea, 'X'),
             "value": str(string_addr),
             "length": string_addr.length,
             "type": string_addr.strtype
         }}
         strings.append(string_info)
     
-    print(f"Found {{len(strings)}} strings")
+    print("Found " + str(len(strings)) + " strings")
     
     # Write strings to file
     with open(os.path.join(OUTPUT_DIR, "strings.json"), "w") as f:
@@ -440,7 +441,7 @@ def export_structures():
                 struct_info["members"] = members
                 structures.append(struct_info)
     
-    print(f"Found {{len(structures)}} structures")
+    print("Found " + str(len(structures)) + " structures")
     
     # Write structures to file
     with open(os.path.join(OUTPUT_DIR, "structures.json"), "w") as f:
@@ -449,6 +450,8 @@ def export_structures():
 if __name__ == "__main__":
     main()
 '''
+        
+        script_content = script_template.format(output_dir=output_dir)
         
         with open(script_path, "w") as f:
             f.write(script_content)

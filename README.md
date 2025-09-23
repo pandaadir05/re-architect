@@ -6,8 +6,6 @@
 
 RE-Architect is an advanced automated reverse-engineering platform that transforms binary files into human-readable function summaries, data structure definitions, and executable test harnesses. The system leverages modern binary analysis techniques and machine learning to provide comprehensive analysis results in an efficient timeframe.
 
-![RE-Architect Banner](docs/images/re-architect-banner.png)
-
 ## Features
 
 - **Binary Analysis**: Decompiles and analyzes binary files using advanced techniques
@@ -42,21 +40,8 @@ pip install -r requirements.txt
 # Install the package in development mode
 pip install -e .
 
-# Run the analysis on a sample binary
-python main.py --input samples/example.exe --output results/ --config config.yaml
-```
-
-For Docker users:
-```bash
-# Build and run using Docker (development)
-docker-compose build
-docker-compose run re-architect --input /app/samples/example.exe --output /app/results/
-
-# For production deployment
-# See DEPLOYMENT.md for complete instructions
-cp .env.prod.template .env.prod
-# Edit .env.prod with your values
-./deploy.sh
+# Run analysis on a binary
+python main.py binary_file.exe --config config.yaml
 ```
 
 ## Technologies
@@ -89,33 +74,24 @@ cp .env.prod.template .env.prod
 ## Example
 
 ```python
-from re_architect import REPipeline
+from src.core.pipeline import ReversePipeline
+from src.core.config import Config
 
 # Initialize the pipeline with configuration
-pipeline = REPipeline("config.yaml")
+config = Config.from_file("config.yaml")
+pipeline = ReversePipeline(config)
 
 # Analyze a binary
-results = pipeline.analyze("path/to/binary")
+results = pipeline.analyze("path/to/binary.exe")
 
-# Generate function summaries
-summaries = results.get_function_summaries()
-
-# Generate test harnesses
-tests = results.generate_test_harnesses()
-
-# Export results
-results.export("output_directory")
+# Access results
+functions = results["functions"]
+metadata = results["metadata"]
 ```
 
 ## Performance
 
-RE-Architect typically processes:
-
-| Binary Size | Processing Time | Memory Usage |
-|-------------|-----------------|-------------|
-| Small (<1MB) | 1-2 minutes | ~2GB |
-| Medium (1-10MB) | 5-10 minutes | ~4GB |
-| Large (>10MB) | 15+ minutes | 8GB+ |
+Performance varies based on binary complexity, analysis depth, and available decompilers. The system supports both lightweight analysis for quick insights and comprehensive deep analysis for detailed reverse engineering work.
 
 ## Contributing
 
