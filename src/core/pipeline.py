@@ -103,7 +103,7 @@ class ReversePipeline:
         
         # Load binary
         start_time = time.time()
-        binary_info = self.binary_loader.load(self.binary_path)
+        binary_info = self.binary_loader.load(self.binary_path, auto_unpack=True)
         stage_times["binary_loading"] = time.time() - start_time
         
         # Store binary metadata
@@ -138,6 +138,24 @@ class ReversePipeline:
         
         # Store data structure information
         self.results["data_structures"] = data_structures
+
+        # Obfuscation optimization (iterative, post-decompilation)
+        try:
+            from src.optimization import ObfuscationOptimizer
+            optimizer = ObfuscationOptimizer()
+            if optimizer.is_available():
+                start_time = time.time()
+                report = optimizer.optimize(self.binary_path)
+                stage_times["obfuscation_optimization"] = time.time() - start_time
+                self.results["obfuscation_optimization"] = {
+                    "iterations": report.iterations,
+                    "changes_applied": report.changes_applied,
+                    "passes_run": report.passes_run,
+                    "details": report.details,
+                }
+        except Exception:
+            # Non-fatal: continue pipeline if optimizer unavailable or fails
+            pass
         
         # Generate function summaries with LLM if enabled
         if self.function_summarizer:
@@ -225,7 +243,7 @@ class ReversePipeline:
         
         # Load binary
         start_time = time.time()
-        binary_info = self.binary_loader.load(self.binary_path)
+        binary_info = self.binary_loader.load(self.binary_path, auto_unpack=True)
         stage_times["binary_loading"] = time.time() - start_time
         
         # Store binary metadata

@@ -13,6 +13,7 @@ from src.decompilers.ghidra_decompiler import GhidraDecompiler
 from src.decompilers.ida_decompiler import IDADecompiler
 from src.decompilers.binary_ninja_decompiler import BinaryNinjaDecompiler
 from src.decompilers.mock_decompiler import MockDecompiler
+from src.decompilers.internal_ir_decompiler import InternalIRDecompiler
 
 logger = logging.getLogger("re-architect.decompilers.factory")
 
@@ -66,6 +67,9 @@ class DecompilerFactory:
         elif decompiler_name == "mock":
             logger.info("Creating Mock decompiler for testing")
             return MockDecompiler()
+        elif decompiler_name == "internal" or decompiler_name == "ir":
+            logger.info("Creating Internal IR decompiler")
+            return InternalIRDecompiler()
         elif decompiler_name == "auto":
             # We'll pick one based on availability later when we have binary info
             logger.info("Creating auto-selected decompiler (will choose when binary is available)")
@@ -82,7 +86,7 @@ class DecompilerFactory:
             Decompiler instance (defaults to Ghidra if available)
         """
         # Try to create decompilers in order of preference
-        for decompiler_class in [GhidraDecompiler, IDADecompiler, BinaryNinjaDecompiler]:
+        for decompiler_class in [InternalIRDecompiler, GhidraDecompiler, IDADecompiler, BinaryNinjaDecompiler]:
             try:
                 decompiler = decompiler_class()
                 if decompiler.is_available():
