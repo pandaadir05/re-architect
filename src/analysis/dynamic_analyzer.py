@@ -483,8 +483,6 @@ class DynamicAnalyzer:
         pid = None
         session = None
         target_path = str(binary_info.path if isinstance(binary_info.path, (str, Path)) else binary_info.path)
-        pid = None
-        session = None
         try:
             pid = frida.spawn([target_path])
             session = frida.attach(pid)
