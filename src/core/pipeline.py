@@ -2,7 +2,7 @@
 Core pipeline module for RE-Architect.
 
 This module defines the main reverse engineering pipeline that coordinates
-the different analysis stages.
+the different analysis stages with advanced error handling and monitoring.
 """
 
 import logging
@@ -12,6 +12,11 @@ from typing import Dict, List, Optional, Any
 
 from src.core.binary_loader import BinaryLoader
 from src.core.config import Config
+from src.core.error_handling import (
+    StructuredLogger, ErrorHandler, monitored_operation,
+    ErrorSeverity, ErrorCategory
+)
+from src.security import SecurityValidator
 from src.decompilers.decompiler_factory import DecompilerFactory
 from src.analysis.static_analyzer import StaticAnalyzer
 from src.analysis.dynamic_analyzer import DynamicAnalyzer
@@ -19,7 +24,7 @@ from src.analysis.data_structure_analyzer import DataStructureAnalyzer
 from src.llm.function_summarizer import FunctionSummarizer
 from src.test_generation.test_generator import TestGenerator
 
-logger = logging.getLogger("re-architect.pipeline")
+logger = StructuredLogger("re-architect.pipeline")
 
 class ReversePipeline:
     """
@@ -37,6 +42,10 @@ class ReversePipeline:
             config: Configuration object
         """
         self.config = config
+        
+        # Initialize error handling and monitoring
+        self.error_handler = ErrorHandler()
+        
         # Other fields will be initialized when analyze() is called
         self.binary_path = None
         self.output_dir = None
@@ -56,12 +65,22 @@ class ReversePipeline:
             "functions": {},
             "data_structures": {},
             "test_harnesses": {},
-            "performance_metrics": {}
+            "performance_metrics": {},
+            "security_report": {},
+            "error_summary": {}
         }
+        
+        # Set up logging context
+        logger.set_context(pipeline_id=id(self))
     
+    @monitored_operation(
+        component="pipeline",
+        category=ErrorCategory.ANALYSIS,
+        severity=ErrorSeverity.HIGH
+    )
     def analyze(self, binary_path, output_dir=None, decompiler="auto", generate_tests=False):
         """
-        Analyze a binary file.
+        Analyze a binary file with comprehensive security and error handling.
         
         Args:
             binary_path: Path to the binary file to analyze
@@ -71,20 +90,64 @@ class ReversePipeline:
             
         Returns:
             Dictionary containing analysis results
-        """
-        # Convert paths
-        self.binary_path = Path(binary_path)
-        if output_dir:
-            self.output_dir = Path(output_dir)
-        else:
-            # Default to a directory next to the binary
-            self.output_dir = self.binary_path.parent / f"{self.binary_path.stem}_analysis"
             
-        self.decompiler_name = decompiler
-        self.generate_tests = generate_tests
-        
-        # Run the pipeline
-        return self._run()
+        Raises:
+            SecurityError: If the binary file is unsafe
+            ValueError: If parameters are invalid
+        """
+        try:
+            # Validate and sanitize inputs using security module
+            validated_binary = SecurityValidator.validate_binary_file(binary_path)
+            
+            if output_dir:
+                validated_output = SecurityValidator.validate_output_directory(output_dir)
+            else:
+                # Default to a directory next to the binary
+                default_output = validated_binary.parent / f"{validated_binary.stem}_analysis"
+                validated_output = SecurityValidator.validate_output_directory(default_output)
+            
+            # Validate decompiler choice
+            if decompiler not in ["ghidra", "ida", "binja", "auto", "mock"]:
+                raise ValueError(f"Invalid decompiler choice: {decompiler}")
+            
+            # Set validated paths
+            self.binary_path = validated_binary
+            self.output_dir = validated_output
+            self.decompiler_name = decompiler
+            self.generate_tests = generate_tests
+            
+            # Set logging context
+            logger.set_context(
+                binary_path=str(self.binary_path),
+                output_dir=str(self.output_dir),
+                decompiler=self.decompiler_name
+            )
+            
+            logger.info("Starting binary analysis", binary_size=self.binary_path.stat().st_size)
+            
+            # Run the pipeline
+            return self._run()
+            
+        except Exception as e:
+            self.error_handler.handle_error(
+                exception=e,
+                severity=ErrorSeverity.HIGH,
+                category=ErrorCategory.ANALYSIS,
+                component="pipeline.analyze",
+                context={
+                    "binary_path": str(binary_path),
+                    "output_dir": str(output_dir) if output_dir else None,
+                    "decompiler": decompiler,
+                    "generate_tests": generate_tests
+                },
+                resolution_steps=[
+                    "Verify the binary file exists and is readable",
+                    "Check that the output directory is writable",
+                    "Ensure the selected decompiler is installed and available",
+                    "Check system resources (memory, disk space)"
+                ]
+            )
+            raise
         
     def _run(self) -> Dict[str, Any]:
         """

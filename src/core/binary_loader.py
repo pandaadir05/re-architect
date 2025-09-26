@@ -122,14 +122,20 @@ class BinaryLoader:
             True if the command is available, False otherwise
         """
         try:
-            subprocess.run(
-                command.split(),
+            # Import security module for safe subprocess execution
+            from src.security import SecurityValidator
+            
+            # Safely split and execute command
+            cmd_list = command.split()
+            SecurityValidator.safe_subprocess_run(
+                cmd_list,
+                timeout=10,  # Short timeout for availability check
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 check=False
             )
             return True
-        except (subprocess.SubprocessError, FileNotFoundError):
+        except Exception:
             return False
     
     def load(self, binary_path: Union[str, Path], auto_unpack: bool = True) -> BinaryInfo:
@@ -144,16 +150,20 @@ class BinaryLoader:
             BinaryInfo object containing information about the binary
             
         Raises:
-            FileNotFoundError: If the binary file doesn't exist
+            SecurityError: If the binary file is unsafe
             ValueError: If the binary format is not supported
         """
-        binary_path = Path(binary_path)
+        # Import security module
+        from src.security import SecurityValidator
         
-        # Check if file exists
-        if not binary_path.exists():
-            raise FileNotFoundError(f"Binary file not found: {binary_path}")
+        # Validate and sanitize the binary path
+        validated_path = SecurityValidator.validate_binary_file(binary_path)
         
-        logger.info(f"Loading binary: {binary_path}")
+        logger.info(f"Loading binary: {validated_path}")
+        
+        # Calculate file hash for integrity checking
+        file_hash = SecurityValidator.calculate_file_hash(validated_path)
+        logger.info(f"Binary hash (SHA256): {file_hash}")
         
         # Check if binary is packed and unpack if needed
         if auto_unpack:
@@ -345,15 +355,19 @@ class BinaryLoader:
             return ""
         
         try:
-            result = subprocess.run(
-                ["file", str(binary_path)],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                check=True,
-                text=True
+            # Import security module for safe subprocess execution
+            from src.security import SecurityValidator
+            
+            # Validate binary path first
+            validated_path = SecurityValidator.validate_binary_file(binary_path)
+            
+            result = SecurityValidator.safe_subprocess_run(
+                ["file", str(validated_path)],
+                timeout=30,
+                check=True
             )
-            return result.stdout.strip()
-        except subprocess.SubprocessError as e:
+            return result.stdout.strip() if result.stdout else ""
+        except Exception as e:
             logger.warning(f"Error running 'file' command: {e}")
             return ""
     

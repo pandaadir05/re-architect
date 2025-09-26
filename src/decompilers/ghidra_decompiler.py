@@ -137,54 +137,55 @@ class GhidraDecompiler(BaseDecompiler):
             project_dir = os.path.join(temp_dir, "project")
             project_name = "re-architect"
             
-            # Create output directory
-            output_dir = os.path.join(temp_dir, "output")
-            os.makedirs(output_dir, exist_ok=True)
+            # Import security module
+            from src.security import SecurityValidator
+            
+            # Create output directory securely
+            output_dir = SecurityValidator.validate_output_directory(
+                os.path.join(temp_dir, "output"), 
+                create_if_missing=True
+            )
             
             # Path to the export script
-            export_script = self._create_export_script(temp_dir, output_dir)
+            export_script = self._create_export_script(temp_dir, str(output_dir))
             
             # Run Ghidra headless analyzer
             headless_script = self._get_headless_script_path()
-            binary_path = str(binary_info.path)
+            
+            # Validate binary path
+            validated_binary = SecurityValidator.validate_binary_file(binary_info.path)
             
             cmd = [
                 headless_script,
                 project_dir,
                 project_name,
-                "-import", binary_path,
+                "-import", str(validated_binary),
                 "-postScript", export_script,
                 "-scriptPath", temp_dir,
                 "-deleteProject"
             ]
             
-            logger.debug(f"Running Ghidra command: {cmd}")
+            logger.debug(f"Running Ghidra command (sanitized): {SecurityValidator._sanitize_command_for_logging(cmd)}")
             
             try:
-                process = subprocess.Popen(
+                # Use secure subprocess execution
+                result = SecurityValidator.safe_subprocess_run(
                     cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
+                    timeout=600,  # 10-minute timeout
+                    cwd=temp_dir
                 )
                 
-                # Wait for the process to complete with a timeout
-                try:
-                    stdout, stderr = process.communicate(timeout=600)  # 10-minute timeout
-                    
-                    if process.returncode != 0:
-                        logger.error(f"Ghidra decompilation failed with code {process.returncode}")
-                        logger.error(f"Stdout: {stdout}")
-                        logger.error(f"Stderr: {stderr}")
-                        raise RuntimeError(f"Ghidra decompilation failed with code {process.returncode}")
-                    
-                except subprocess.TimeoutExpired:
-                    process.kill()
-                    logger.error("Ghidra decompilation timed out")
-                    raise RuntimeError("Ghidra decompilation timed out after 10 minutes")
+                # Check if execution was successful
+                if result.returncode != 0:
+                    logger.error(f"Ghidra decompilation failed with code {result.returncode}")
+                    if result.stdout:
+                        logger.error(f"Stdout: {result.stdout}")
+                    if result.stderr:
+                        logger.error(f"Stderr: {result.stderr}")
+                    raise RuntimeError(f"Ghidra decompilation failed with code {result.returncode}")
                 
                 # Parse the output files
-                return self._parse_output(binary_info, output_dir)
+                return self._parse_output(binary_info, str(output_dir))
                 
             except Exception as e:
                 logger.exception(f"Error running Ghidra: {e}")
