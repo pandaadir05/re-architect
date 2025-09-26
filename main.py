@@ -7,7 +7,6 @@ argument parsing, binary loading, and orchestrating the reverse engineering pipe
 
 import argparse
 import logging
-import os
 import sys
 import time
 from pathlib import Path

@@ -7,8 +7,6 @@ unpack binaries to enable static analysis.
 """
 
 import logging
-import tempfile
-import os
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
