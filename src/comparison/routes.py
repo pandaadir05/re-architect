@@ -44,13 +44,13 @@ def get_project(project_id):
     
     # Convert to dictionary
     project_dict = {
-        "id": project.id,
+        "id": project.project_id,
         "name": project.name,
         "binary_path": project.binary_path,
         "timestamp": project.timestamp.isoformat() if project.timestamp else None,
-        "version": project.version,
+        "version": getattr(project, 'version', '1.0'),
         "description": project.description,
-        "tags": project.tags
+        "tags": getattr(project, 'tags', [])
     }
     
     # Include analysis_data only if explicitly requested
@@ -764,14 +764,14 @@ def export_analysis(project_id):
     # Write project data to file
     with open(temp_path, 'w') as f:
         json.dump({
-            "id": project.id,
+            "id": project.project_id,
             "name": project.name,
             "binary_path": project.binary_path,
             "timestamp": project.timestamp.isoformat() if project.timestamp else None,
-            "version": project.version,
+            "version": getattr(project, 'version', '1.0'),
             "description": project.description,
-            "tags": project.tags,
-            "analysis_data": project.analysis_data
+            "tags": getattr(project, 'tags', []),
+            "analysis_data": getattr(project, 'analysis_data', {})
         }, f, indent=2)
     
     # Send file

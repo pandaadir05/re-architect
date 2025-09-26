@@ -65,14 +65,13 @@ class TestComparisonRoutes:
     def test_get_project_success(self, client, mock_auth, mock_store):
         """Test getting a specific project returns 200 with project data."""
         project = AnalysisProject(
-            id="proj1",
+            project_id="proj1",
             name="Test Project",
             binary_path="/path/to/binary",
-            analysis_data={"functions": []}
+            description="Test description"
         )
         project.timestamp = datetime.now()
         project.version = "1.0"
-        project.description = "Test description"
         project.tags = ["test", "example"]
         
         mock_store.get_project.return_value = project
@@ -100,16 +99,18 @@ class TestComparisonRoutes:
     def test_get_project_functions_success(self, client, mock_auth, mock_store):
         """Test getting project functions returns 200 with function list."""
         project = AnalysisProject(
-            id="proj1",
+            project_id="proj1",
             name="Test Project",
             binary_path="/path/to/binary",
-            analysis_data={
-                "functions": [
-                    {"id": "func1", "name": "main", "size": 100},
-                    {"id": "func2", "name": "helper", "size": 50}
-                ]
-            }
+            description="Test project with functions"
         )
+        # Mock the functions data directly on the project
+        project.analysis_data = {
+            "functions": [
+                {"id": "func1", "name": "main", "size": 100},
+                {"id": "func2", "name": "helper", "size": 50}
+            ]
+        }
         mock_store.get_project.return_value = project
         
         response = client.get('/project/proj1/functions')
@@ -124,17 +125,19 @@ class TestComparisonRoutes:
     def test_get_project_functions_with_filters(self, client, mock_auth, mock_store):
         """Test getting project functions with filtering and pagination."""
         project = AnalysisProject(
-            id="proj1",
+            project_id="proj1",
             name="Test Project",
             binary_path="/path/to/binary",
-            analysis_data={
-                "functions": [
-                    {"id": "func1", "name": "main_function", "size": 100},
-                    {"id": "func2", "name": "helper_function", "size": 50},
-                    {"id": "func3", "name": "other", "size": 25}
-                ]
-            }
+            description="Test project with multiple functions"
         )
+        # Mock the functions data directly on the project
+        project.analysis_data = {
+            "functions": [
+                {"id": "func1", "name": "main_function", "size": 100},
+                {"id": "func2", "name": "helper_function", "size": 50},
+                {"id": "func3", "name": "other", "size": 25}
+            ]
+        }
         mock_store.get_project.return_value = project
         
         # Test name filtering
@@ -263,14 +266,14 @@ class TestComparisonRoutes:
     def test_export_analysis_success(self, client, mock_auth, mock_store):
         """Test exporting analysis returns file download."""
         project = AnalysisProject(
-            id="proj1",
+            project_id="proj1",
             name="Test Project",
             binary_path="/path/to/binary",
-            analysis_data={"functions": []}
+            description="Test description"
         )
         project.timestamp = datetime.now()
         project.version = "1.0"
-        project.description = "Test description"
+        project.analysis_data = {"functions": []}
         project.tags = ["test"]
         
         mock_store.get_project.return_value = project
