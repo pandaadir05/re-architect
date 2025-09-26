@@ -166,7 +166,7 @@ class IntermediateRepresentationFunction:
     function_return_type_description: str = "unknown"
     function_parameter_descriptions: List[str] = field(default_factory=list)
     basic_blocks: List[IntermediateRepresentationBasicBlock] = field(default_factory=list)
-    sky_level_function_ast: Optional["SkyLevelFunctionAbstractSyntaxTree"] = None
+    enterprise_function_ast: Optional["EnterpriseFunctionAbstractSyntaxTree"] = None
 
 
 @dataclass
@@ -180,7 +180,7 @@ class IntermediateRepresentationProgram:
 # Sky-Level IR types
 
 @dataclass
-class SkyLevelAbstractSyntaxTreeNode:
+class EnterpriseAbstractSyntaxTreeNode:
     """A node in the sky-level AST representing a high-level construct.
 
     node_kind_name examples: "function_definition", "if_statement",
@@ -189,16 +189,16 @@ class SkyLevelAbstractSyntaxTreeNode:
     """
     node_kind_name: str
     node_properties: Dict[str, Any] = field(default_factory=dict)
-    child_nodes: List["SkyLevelAbstractSyntaxTreeNode"] = field(default_factory=list)
+    child_nodes: List["EnterpriseAbstractSyntaxTreeNode"] = field(default_factory=list)
     source_ground_level_addresses: List[int] = field(default_factory=list)
 
 
 @dataclass
-class SkyLevelFunctionAbstractSyntaxTree:
+class EnterpriseFunctionAbstractSyntaxTree:
     """A sky-level AST for a function, similar to a simplified C/C++ AST."""
     function_name: str
     return_type_description: str
     parameter_descriptions: List[str]
-    root_node: SkyLevelAbstractSyntaxTreeNode
+    root_node: EnterpriseAbstractSyntaxTreeNode
 
 

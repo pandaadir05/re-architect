@@ -34,8 +34,8 @@ from src.ir import (
     IRMemoryOrdering,
     IRMemoryAddressExpression,
     IROperationCategory,
-    SkyLevelAbstractSyntaxTreeNode,
-    SkyLevelFunctionAbstractSyntaxTree,
+    EnterpriseAbstractSyntaxTreeNode,
+    EnterpriseFunctionAbstractSyntaxTree,
 )
 
 logger = logging.getLogger("re-architect.decompilers.internal_ir")
@@ -237,19 +237,19 @@ class InternalIRDecompiler(BaseDecompiler):
                 return binary_bytes[offset:offset + size], vaddr
         return None, 0
 
-    def _build_minimal_sky_ast(self, function_name: str, return_value: int, source_addrs: List[int]) -> SkyLevelFunctionAbstractSyntaxTree:
-        return_stmt = SkyLevelAbstractSyntaxTreeNode(
+    def _build_minimal_enterprise_ast(self, function_name: str, return_value: int, source_addrs: List[int]) -> EnterpriseFunctionAbstractSyntaxTree:
+        return_stmt = EnterpriseAbstractSyntaxTreeNode(
             node_kind_name="return_statement",
             node_properties={"return_expression": return_value},
             source_ground_level_addresses=source_addrs,
         )
-        root = SkyLevelAbstractSyntaxTreeNode(
+        root = EnterpriseAbstractSyntaxTreeNode(
             node_kind_name="function_definition",
             node_properties={},
             child_nodes=[return_stmt],
             source_ground_level_addresses=source_addrs,
         )
-        return SkyLevelFunctionAbstractSyntaxTree(
+        return EnterpriseFunctionAbstractSyntaxTree(
             function_name=function_name,
             return_type_description="int",
             parameter_descriptions=[],

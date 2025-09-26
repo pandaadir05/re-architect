@@ -17,23 +17,43 @@ to enable self-documenting structures during debugging and analysis.
 """
 
 from .ir_core import (
+    # Core IR classes
     IntermediateRepresentationProgram,
     IntermediateRepresentationFunction,
     IntermediateRepresentationBasicBlock,
     GroundLevelInstruction,
     GroundLevelOperand,
-    SkyLevelAbstractSyntaxTreeNode,
-    SkyLevelFunctionAbstractSyntaxTree,
+    EnterpriseAbstractSyntaxTreeNode,
+    EnterpriseFunctionAbstractSyntaxTree,
+    # Enums and supporting classes
+    IRIntegerSignedness,
+    IRScalarElementType,
+    IRVectorShape,
+    IRRoundingMode,
+    IRMemoryOrdering,
+    IRAddressingForm,
+    IRMemoryAddressExpression,
+    IROperationCategory,
 )
 
 __all__ = [
+    # Core IR classes
     "IntermediateRepresentationProgram",
-    "IntermediateRepresentationFunction",
+    "IntermediateRepresentationFunction", 
     "IntermediateRepresentationBasicBlock",
     "GroundLevelInstruction",
     "GroundLevelOperand",
-    "SkyLevelAbstractSyntaxTreeNode",
-    "SkyLevelFunctionAbstractSyntaxTree",
+    "EnterpriseAbstractSyntaxTreeNode",
+    "EnterpriseFunctionAbstractSyntaxTree",
+    # Enums and supporting classes
+    "IRIntegerSignedness",
+    "IRScalarElementType", 
+    "IRVectorShape",
+    "IRRoundingMode",
+    "IRMemoryOrdering",
+    "IRAddressingForm",
+    "IRMemoryAddressExpression",
+    "IROperationCategory",
 ]
 
 

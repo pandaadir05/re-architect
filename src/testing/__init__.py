@@ -80,15 +80,15 @@ class TestDataGenerator:
     def generate_elf_header() -> bytes:
         """Generate a minimal valid ELF header."""
         return (
-            b'\x7fELF'  # ELF magic
-            b'\x01'     # 32-bit
-            b'\x01'     # Little endian
-            b'\x01'     # ELF version
-            b'\x00' * 9  # Padding
-            b'\x02\x00'  # Executable file
-            b'\x03\x00'  # i386
-            b'\x01\x00\x00\x00'  # ELF version
-            b'\x00' * 36  # Rest of header
+            b'\x7fELF' +   # ELF magic
+            b'\x01' +      # 32-bit
+            b'\x01' +      # Little endian
+            b'\x01' +      # ELF version
+            b'\x00' * 9 +  # Padding
+            b'\x02\x00' +  # Executable file
+            b'\x03\x00' +  # i386
+            b'\x01\x00\x00\x00' +  # ELF version
+            b'\x00' * 36   # Rest of header
         )
     
     @staticmethod

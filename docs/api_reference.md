@@ -1,40 +1,60 @@
-# API Reference
+# API Reference# API Reference
 
-## Overview
 
-RE-Architect provides both command-line and programmatic interfaces for binary analysis. This document describes the Python API for integrating RE-Architect into other applications.
 
-## Core Components
+## Basic Usage## Python API
 
-### ReversePipeline
 
-The main entry point for programmatic analysis.
 
-```python
-from src.core.pipeline import ReversePipeline
-from src.core.config import Config
+```python```python
 
-# Create pipeline
-config = Config.from_file("config.yaml")
-pipeline = ReversePipeline(config)
+from src.core.pipeline import ReversePipelinefrom src.core.pipeline import ReversePipeline
 
-# Analyze binary
-results = pipeline.analyze(
+from src.core.config import Configfrom src.core.config import Config
+
+
+
+# Initialize# Initialize
+
+config = Config.from_file("config.yaml")config = Config.from_file("config.yaml")
+
+pipeline = ReversePipeline(config)pipeline = ReversePipeline(config)
+
+
+
+# Analyze binary# Analyze binary
+
+results = pipeline.analyze("binary.exe")results = pipeline.analyze(
+
     binary_path="path/to/binary.exe",
-    output_dir="./output",
-    decompiler="ghidra",
-    generate_tests=True
-)
+
+# Access results    output_dir="./output",
+
+functions = results["functions"]    decompiler="ghidra",
+
+metadata = results["metadata"]    generate_tests=True
+
+```)
+
 ```
+
+## Configuration
 
 #### Methods
 
-##### `__init__(config: Config)`
+```python
+
+# Load config from file##### `__init__(config: Config)`
+
+config = Config.from_file("config.yaml")
 
 Initialize the pipeline with configuration.
 
-**Parameters:**
-- `config`: Configuration object containing analysis settings
+# Access settings
+
+decompiler_path = config.get("decompilers.ghidra.path")**Parameters:**
+
+```- `config`: Configuration object containing analysis settings
 
 ##### `analyze(binary_path, output_dir=None, decompiler="auto", generate_tests=False)`
 

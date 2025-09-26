@@ -1,6 +1,6 @@
 # RE-Architect
 
-[![Build Status](https://github.com/pandaadir05/re-architect/workflows/RE-Architect%20CI/badge.svg)](https://github.com/pandaadir05/re-architect/actions)
+[![Build Status](https://github.com/pandaadir05/re-architect/workflows/CI/badge.svg)](https://github.com/pandaadir05/re-architect/actions)
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -59,9 +59,6 @@ python main.py binary_file.exe --config config.yaml
 
 - [Installation Guide](docs/installation.md) - Detailed setup instructions for different environments
 - [Quick Start Guide](docs/quick_start.md) - Get up and running in minutes
-- [Web Interface](docs/web_interface.md) - Using the visualization interface
-- [User Manual](docs/user_manual.md) - Complete usage documentation
-- [API Reference](docs/api_reference.md) - Programmatic interfaces for integration
 
 ## Requirements
 

@@ -6,6 +6,15 @@ input validation, and subprocess execution to prevent common security
 vulnerabilities.
 """
 
+__all__ = [
+    'SecurityValidator',
+    'SecurityAudit', 
+    'SecurityError',
+    'PathTraversalError',
+    'InputValidationError',
+    'UnsafeOperationError'
+]
+
 import os
 import re
 import shlex

@@ -1,57 +1,110 @@
-# User Manual
+# User Manual# User Manual
 
-## Introduction
 
-RE-Architect is a comprehensive automated reverse engineering platform that transforms binary files into human-readable function summaries, data structure definitions, and executable test harnesses.
 
-## Getting Started
+## Command Line Usage## Introduction
+
+
+
+Basic analysis:RE-Architect is a comprehensive automated reverse engineering platform that transforms binary files into human-readable function summaries, data structure definitions, and executable test harnesses.
+
+```bash
+
+python main.py binary_file.exe## Getting Started
+
+```
 
 ### Prerequisites
 
-Before using RE-Architect, ensure you have:
-- Python 3.11 or higher
-- At least 16GB RAM (recommended for large binaries)
+Specify output directory:
+
+```bashBefore using RE-Architect, ensure you have:
+
+python main.py binary_file.exe --output results/- Python 3.11 or higher
+
+```- At least 16GB RAM (recommended for large binaries)
+
 - One of the supported decompilers:
-  - Ghidra (recommended, free)
-  - IDA Pro (commercial)
-  - Binary Ninja (commercial)
+
+Use specific decompiler:  - Ghidra (recommended, free)
+
+```bash  - IDA Pro (commercial)
+
+python main.py binary_file.exe --decompiler ghidra  - Binary Ninja (commercial)
+
+```
 
 ### Basic Usage
 
+## Configuration File
+
 1. **Analyze a binary file:**
-   ```bash
+
+The config.yaml file contains decompiler paths and analysis settings:   ```bash
+
    python main.py /path/to/binary.exe
+
+```yaml   ```
+
+decompilers:
+
+  ghidra:2. **Specify output directory:**
+
+    enabled: true   ```bash
+
+    path: "/opt/ghidra"   python main.py /path/to/binary.exe --output-dir ./my_analysis
+
+  ida:   ```
+
+    enabled: false
+
+    path: "/opt/ida"3. **Use a specific decompiler:**
+
+   ```bash
+
+analysis:   python main.py /path/to/binary.exe --decompiler ghidra
+
+  max_functions: 1000   ```
+
+  timeout: 300
+
+```4. **Generate test harnesses:**
+
+   ```bash
+
+## Output Files   python main.py /path/to/binary.exe --generate-tests
+
    ```
 
-2. **Specify output directory:**
-   ```bash
-   python main.py /path/to/binary.exe --output-dir ./my_analysis
-   ```
-
-3. **Use a specific decompiler:**
-   ```bash
-   python main.py /path/to/binary.exe --decompiler ghidra
-   ```
-
-4. **Generate test harnesses:**
-   ```bash
-   python main.py /path/to/binary.exe --generate-tests
-   ```
+Analysis results are saved to the output directory:
 
 5. **Start web visualization:**
-   ```bash
-   python main.py /path/to/binary.exe --serve
-   ```
 
-## Command Line Options
+- functions.json - Extracted function information   ```bash
 
-| Option | Description | Default |
+- structures.json - Data structure definitions   python main.py /path/to/binary.exe --serve
+
+- decompiled/ - Decompiled source code   ```
+
+
+
+## Web Interface## Command Line Options
+
+
+
+Start the web interface to view results:| Option | Description | Default |
+
 |--------|-------------|---------|
-| `binary_path` | Path to the binary file to analyze | Required |
-| `--output-dir` | Directory to store output files | `./output` |
-| `--config` | Path to configuration file | `./config.yaml` |
+
+```bash| `binary_path` | Path to the binary file to analyze | Required |
+
+python -m src.visualization.server| `--output-dir` | Directory to store output files | `./output` |
+
+```| `--config` | Path to configuration file | `./config.yaml` |
+
 | `--decompiler` | Decompiler to use (ghidra/ida/binja/auto) | `auto` |
-| `--verbose` | Increase verbosity (-v, -vv) | `false` |
+
+Access at http://localhost:5000| `--verbose` | Increase verbosity (-v, -vv) | `false` |
 | `--no-llm` | Disable LLM-based analysis | `false` |
 | `--generate-tests` | Generate test harnesses | `false` |
 | `--serve` | Start web server after analysis | `false` |
