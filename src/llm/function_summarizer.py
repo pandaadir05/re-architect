@@ -277,6 +277,19 @@ DISASSEMBLED INSTRUCTIONS:
                     prompt += f"\nRELEVANT STRINGS:\n"
                     for addr, string in relevant_strings:
                         prompt += f"  \"{string}\"\n"
+
+            # If Internal IR is available, include a concise description of the sky-level
+            # representation and ground-level instruction count to improve summaries.
+            if "internal_ir" in context:
+                ir_info = context["internal_ir"]
+                prompt += f"\nINTERNAL IR CONTEXT:\n"
+                if ir_info.get("sky_c_like"):
+                    prompt += "  Sky-Level C-like Rendering (truncated):\n"
+                    sky = ir_info["sky_c_like"]
+                    truncated = sky[:400]
+                    prompt += "  " + truncated.replace("\n", "\n  ") + ("...\n" if len(sky) > 400 else "\n")
+                if ir_info.get("ground_instruction_count") is not None:
+                    prompt += f"  Ground-Level Instruction Count: {ir_info['ground_instruction_count']}\n"
         
         prompt += """
 ANALYSIS REQUEST:
@@ -471,12 +484,18 @@ Respond with a single sentence describing what this function does."""
         Legacy method for backward compatibility.
         Generate detailed information about a function from a dictionary.
         """
-        return {
+        result = {
             "summary": f"Function {function_info.get('name', 'unknown')} analyzed via legacy method",
             "purpose": "Legacy analysis - upgrade to enhanced analysis for better results",
             "arguments": function_info.get('parameters', []),
             "return_value": function_info.get('return_type', 'unknown')
         }
+        # If sky-level IR code is present in the metadata (from InternalIRDecompiler), append a preview.
+        ir_meta = function_info.get('ir_available') or function_info.get('sky_ast')
+        if ir_meta and 'decompiled_code' in function_info:
+            preview = function_info['decompiled_code'][:120]
+            result['ir_preview'] = preview
+        return result
     
     def get_statistics(self) -> Dict[str, Any]:
         """Get summarizer statistics."""

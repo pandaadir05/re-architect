@@ -132,12 +132,13 @@ class BinaryLoader:
         except (subprocess.SubprocessError, FileNotFoundError):
             return False
     
-    def load(self, binary_path: Union[str, Path]) -> BinaryInfo:
+    def load(self, binary_path: Union[str, Path], auto_unpack: bool = True) -> BinaryInfo:
         """
         Load and analyze a binary file.
         
         Args:
             binary_path: Path to the binary file
+            auto_unpack: Whether to automatically unpack if binary is detected as packed
             
         Returns:
             BinaryInfo object containing information about the binary
@@ -153,6 +154,10 @@ class BinaryLoader:
             raise FileNotFoundError(f"Binary file not found: {binary_path}")
         
         logger.info(f"Loading binary: {binary_path}")
+        
+        # Check if binary is packed and unpack if needed
+        if auto_unpack:
+            binary_path = self._check_and_unpack(binary_path)
         
         # Use LIEF if available for better analysis
         if LIEF_AVAILABLE:
@@ -225,6 +230,48 @@ class BinaryLoader:
             logger.error(f"Error using LIEF to parse {binary_path}: {e}")
             logger.info("Falling back to basic analysis")
             return self._load_with_fallback(binary_path)
+    
+    def _check_and_unpack(self, binary_path: Path) -> Path:
+        """
+        Check if binary is packed and unpack if necessary.
+        
+        Args:
+            binary_path: Path to the binary file
+            
+        Returns:
+            Path to the binary (original or unpacked)
+        """
+        try:
+            from src.unpacking import SymbolicUnpacker
+            
+            unpacker = SymbolicUnpacker()
+            if not unpacker.is_available():
+                logger.debug("Angr not available for unpacking")
+                return binary_path
+            
+            # Check if binary is packed
+            packer = unpacker.detect_packer(binary_path)
+            if not packer:
+                logger.debug("Binary does not appear to be packed")
+                return binary_path
+            
+            logger.info(f"Detected packed binary with packer: {packer}")
+            
+            # Attempt to unpack
+            result = unpacker.unpack(binary_path)
+            if result.success and result.unpacked_path:
+                logger.info(f"Successfully unpacked binary to: {result.unpacked_path}")
+                return result.unpacked_path
+            else:
+                logger.warning(f"Failed to unpack binary: {result.error_message}")
+                return binary_path
+                
+        except ImportError:
+            logger.debug("Unpacking module not available")
+            return binary_path
+        except Exception as e:
+            logger.error(f"Error during unpacking: {e}")
+            return binary_path
     
     def _load_with_fallback(self, binary_path: Path) -> BinaryInfo:
         """

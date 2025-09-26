@@ -7,6 +7,8 @@ tqdm>=4.64.0
 capstone>=5.0.0
 lief>=0.12.0
 r2pipe>=1.6.5
+frida>=16.0.0
+angr>=9.2.0
 
 # Data analysis and machine learning
 numpy>=1.22.0
