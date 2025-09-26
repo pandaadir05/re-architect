@@ -13,6 +13,23 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 
+# Try to import angr and claripy at module level
+try:
+    import angr
+    import claripy
+    ANGR_AVAILABLE = True
+except ImportError:
+    ANGR_AVAILABLE = False
+    # Create placeholder classes to avoid undefined name errors
+    class MockAngr:
+        pass
+    class MockClaripy:
+        class ast:
+            class BV:
+                pass
+    angr = MockAngr()
+    claripy = MockClaripy()
+
 logger = logging.getLogger("re-architect.unpacking.symbolic")
 
 @dataclass
@@ -172,11 +189,8 @@ class SymbolicUnpacker:
                 error_message="No packer detected"
             )
         
-        try:
-            # Try to import Angr
-            import angr
-            import claripy
-        except ImportError:
+        # Check if Angr is available
+        if not ANGR_AVAILABLE:
             return UnpackingResult(
                 success=False,
                 original_path=binary_path,
@@ -317,11 +331,7 @@ class SymbolicUnpacker:
     
     def is_available(self) -> bool:
         """Check if Angr is available for symbolic execution."""
-        try:
-            import angr
-            return True
-        except ImportError:
-            return False
+        return ANGR_AVAILABLE
     
     def get_unpacker_info(self) -> Dict[str, Any]:
         """Get information about the unpacker."""
