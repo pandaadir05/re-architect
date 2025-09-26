@@ -7,6 +7,7 @@ unpack binaries to enable static analysis.
 """
 
 import logging
+import math
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
@@ -161,7 +162,7 @@ class SymbolicUnpacker:
         for count in byte_counts:
             if count > 0:
                 probability = count / data_len
-                entropy -= probability * (probability.bit_length() - 1)
+                entropy -= probability * math.log2(probability)
                 
         return entropy
     

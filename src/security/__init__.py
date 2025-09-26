@@ -20,6 +20,7 @@ import re
 import shlex
 import subprocess
 import logging
+import sys
 from pathlib import Path, PurePath
 from typing import List, Dict, Any, Optional, Union
 import hashlib
@@ -57,8 +58,14 @@ class SecurityValidator:
         '.o', '.obj', '.a', '.lib', '.sys', '.ko'
     }
     
-    # Dangerous characters in filenames
-    DANGEROUS_FILENAME_CHARS = ['..', '~', '$', '`', '|', '&', ';', '<', '>', '(', ')', '[', ']', '{', '}', '"', "'", '\\']
+    # Dangerous characters in filenames (OS-aware)
+    @property
+    def DANGEROUS_FILENAME_CHARS(self):
+        chars = ['..', '~', '$', '`', '|', '&', ';', '<', '>', '(', ')', '[', ']', '{', '}', '"', "'"]
+        # Only include backslash as dangerous on non-Windows systems
+        if sys.platform != 'win32':
+            chars.append('\\')
+        return chars
     
     # Maximum file size for analysis (500MB)
     MAX_FILE_SIZE = 500 * 1024 * 1024
@@ -89,7 +96,8 @@ class SecurityValidator:
             
             # Check for dangerous patterns
             path_str = str(path)
-            for dangerous_char in SecurityValidator.DANGEROUS_FILENAME_CHARS:
+            validator_instance = SecurityValidator()
+            for dangerous_char in validator_instance.DANGEROUS_FILENAME_CHARS:
                 if dangerous_char in path_str:
                     raise PathTraversalError(f"Dangerous character '{dangerous_char}' in path: {path}")
             
@@ -171,7 +179,8 @@ class SecurityValidator:
             
             # Check for dangerous patterns
             path_str = str(path)
-            for dangerous_char in SecurityValidator.DANGEROUS_FILENAME_CHARS:
+            validator_instance = SecurityValidator()
+            for dangerous_char in validator_instance.DANGEROUS_FILENAME_CHARS:
                 if dangerous_char in path_str:
                     raise PathTraversalError(f"Dangerous character '{dangerous_char}' in path: {path}")
             

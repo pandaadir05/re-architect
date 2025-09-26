@@ -18,6 +18,13 @@ try:
 except ImportError:
     LIEF_AVAILABLE = False
 
+try:
+    from src.unpacking.symbolic_unpacker import SymbolicUnpacker
+    SYMBOLIC_UNPACKER_AVAILABLE = True
+except ImportError:
+    SymbolicUnpacker = None
+    SYMBOLIC_UNPACKER_AVAILABLE = False
+
 logger = logging.getLogger("re-architect.binary_loader")
 
 class Architecture(Enum):
@@ -252,7 +259,9 @@ class BinaryLoader:
             Path to the binary (original or unpacked)
         """
         try:
-            from src.unpacking import SymbolicUnpacker
+            if not SYMBOLIC_UNPACKER_AVAILABLE or SymbolicUnpacker is None:
+                logger.debug("SymbolicUnpacker not available")
+                return binary_path
             
             unpacker = SymbolicUnpacker()
             if not unpacker.is_available():

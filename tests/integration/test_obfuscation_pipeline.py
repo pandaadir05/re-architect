@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import patch, Mock
 
 from src.core.pipeline import ReversePipeline
+from src.core.config import Config
 
 
 @patch('src.core.pipeline.ObfuscationOptimizer')
@@ -21,8 +22,9 @@ def test_pipeline_reports_obfuscation_optimization(mock_opt_class, tmp_path):
     mock_opt.optimize.return_value = mock_report
     mock_opt_class.return_value = mock_opt
 
-    pipeline = ReversePipeline()
-    result = pipeline.run(binary)
+    config = Config()
+    pipeline = ReversePipeline(config)
+    result = pipeline.analyze(binary)
 
     assert "obfuscation_optimization" in result
     info = result["obfuscation_optimization"]

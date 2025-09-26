@@ -24,6 +24,13 @@ from src.analysis.data_structure_analyzer import DataStructureAnalyzer
 from src.llm.function_summarizer import FunctionSummarizer
 from src.test_generation.test_generator import TestGenerator
 
+try:
+    from src.optimization import ObfuscationOptimizer
+    OPTIMIZATION_AVAILABLE = True
+except ImportError:
+    ObfuscationOptimizer = None
+    OPTIMIZATION_AVAILABLE = False
+
 logger = StructuredLogger("re-architect.pipeline")
 
 class ReversePipeline:
@@ -204,8 +211,10 @@ class ReversePipeline:
 
         # Obfuscation optimization (iterative, post-decompilation)
         try:
-            from src.optimization import ObfuscationOptimizer
-            optimizer = ObfuscationOptimizer()
+            if not OPTIMIZATION_AVAILABLE or ObfuscationOptimizer is None:
+                logger.warning("Optimization not available - skipping obfuscation removal")
+            else:
+                optimizer = ObfuscationOptimizer()
             if optimizer.is_available():
                 start_time = time.time()
                 report = optimizer.optimize(self.binary_path)

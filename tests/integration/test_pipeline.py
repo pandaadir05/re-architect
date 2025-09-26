@@ -102,10 +102,19 @@ class TestPipelineIntegration:
                 self.architecture = "x86_64"
                 self.compiler = "gcc"
                 self.entry_point = 0x1000
+                self.sections = {'.text': {'start': 0x1000, 'size': 0x1000, 'data': b'MOCK_CODE'}}
+                self.symbols = {}
+                self.format = "ELF"
+                self.bit_width = 64
+                self.endianness = "little"
+                self.stripped = False
+                self.is_library = False
+                self.imports = {}
+                self.exports = []
         
         monkeypatch.setattr(src.core.binary_loader.BinaryLoader,
                            'load',
-                           lambda self, path: MockBinaryInfo())
+                           lambda self, path, **kwargs: MockBinaryInfo())
                            
         # Mock _save_results to do nothing
         monkeypatch.setattr(src.core.pipeline.ReversePipeline,

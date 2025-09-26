@@ -24,6 +24,8 @@ try:
     import claripy  # type: ignore
     ANGR_AVAILABLE = True
 except Exception:
+    angr = None
+    claripy = None
     ANGR_AVAILABLE = False
 
 
