@@ -283,8 +283,8 @@ class InternalIRDecompiler(BaseDecompiler):
         # Operands
         operands: List[GroundLevelOperand] = []
         try:
-            x86 = insn.operands
-            for idx, op in enumerate(x86):
+            operands_list = insn.operands
+            for idx, op in enumerate(operands_list):
                 role = self._infer_operand_role(mnem, idx)
                 if op.type == md.x86.OP_REG:
                     reg_name = md.reg_name(op.reg)
