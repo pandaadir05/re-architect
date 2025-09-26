@@ -149,10 +149,10 @@ def create_project():
     
     # Create project
     project = AnalysisProject(
-        id=data.get('id'),
+        project_id=data.get('id'),
         name=data['name'],
-        binary_path=data['binary_path'],
-        analysis_data=data.get('analysis_data', {})
+        description=data.get('description', ''),
+        binary_path=data['binary_path']
     )
     
     # Add optional fields
@@ -206,8 +206,8 @@ def get_comparison(comparison_id):
         "id": comparison.id,
         "name": comparison.name,
         "timestamp": comparison.timestamp.isoformat() if comparison.timestamp else None,
-        "project1_id": comparison.project1_id,
-        "project2_id": comparison.project2_id,
+        "project1_id": comparison.base_version_id,
+        "project2_id": comparison.target_version_id,
         "description": comparison.description,
         "tags": comparison.tags,
     }
@@ -803,10 +803,9 @@ def import_analysis():
         
         # Create project
         project = AnalysisProject(
-            id=None,  # Create new ID
             name=data['name'],
-            binary_path=data.get('binary_path', ''),
-            analysis_data=data.get('analysis_data', {})
+            description=data.get('description', ''),
+            binary_path=data.get('binary_path', '')
         )
         
         # Add optional fields
