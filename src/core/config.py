@@ -7,10 +7,12 @@ This module handles loading, validating, and accessing configuration settings.
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Type, TypeVar
 import yaml
 
 logger = logging.getLogger("re-architect.config")
+
+T = TypeVar('T')
 
 class Config:
     """
@@ -172,7 +174,7 @@ class Config:
             logger.error(f"Error parsing configuration file: {e}")
             raise
     
-    def get(self, key_path: str, default: Any = None) -> Any:
+    def get(self, key_path: str, default: Optional[T] = None) -> Union[T, Any]:
         """
         Get a configuration value using a dot-separated path.
         
