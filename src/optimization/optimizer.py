@@ -98,7 +98,7 @@ class MixedBooleanArithmeticSimplificationPass(BaseOptimizationPass):
         try:
             if getattr(expr, 'op', None) == '__xor__':
                 a, b = expr.args
-                if a is b:
+                if claripy.is_same_ast(a, b):
                     return claripy.BVV(0, expr.size())
             if getattr(expr, 'op', None) == 'If':
                 c, t, f = expr.args
