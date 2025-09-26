@@ -59,6 +59,8 @@ python main.py binary_file.exe --config config.yaml
 
 - [Installation Guide](docs/installation.md) - Detailed setup instructions for different environments
 - [Quick Start Guide](docs/quick_start.md) - Get up and running in minutes
+- [User Manual](docs/user_manual.md) - Comprehensive usage guide and tutorials
+- [API Reference](docs/api_reference.md) - Complete Python API documentation
 
 ## Requirements
 

@@ -1,60 +1,36 @@
-# API Reference# API Reference
+# API Reference
 
+## Python API
 
+### ReversePipeline Class
 
-## Basic Usage## Python API
+The main entry point for binary analysis.
 
+```python
+from src.core.pipeline import ReversePipeline
+from src.core.config import Config
 
+# Initialize
+config = Config.from_file("config.yaml")
+pipeline = ReversePipeline(config)
 
-```python```python
-
-from src.core.pipeline import ReversePipelinefrom src.core.pipeline import ReversePipeline
-
-from src.core.config import Configfrom src.core.config import Config
-
-
-
-# Initialize# Initialize
-
-config = Config.from_file("config.yaml")config = Config.from_file("config.yaml")
-
-pipeline = ReversePipeline(config)pipeline = ReversePipeline(config)
-
-
-
-# Analyze binary# Analyze binary
-
-results = pipeline.analyze("binary.exe")results = pipeline.analyze(
-
+# Analyze binary
+results = pipeline.analyze(
     binary_path="path/to/binary.exe",
-
-# Access results    output_dir="./output",
-
-functions = results["functions"]    decompiler="ghidra",
-
-metadata = results["metadata"]    generate_tests=True
-
-```)
-
+    output_dir="./output",
+    decompiler="ghidra",
+    generate_tests=True
+)
 ```
-
-## Configuration
 
 #### Methods
 
-```python
-
-# Load config from file##### `__init__(config: Config)`
-
-config = Config.from_file("config.yaml")
+##### `__init__(config: Config)`
 
 Initialize the pipeline with configuration.
 
-# Access settings
-
-decompiler_path = config.get("decompilers.ghidra.path")**Parameters:**
-
-```- `config`: Configuration object containing analysis settings
+**Parameters:**
+- `config`: Configuration object containing analysis settings
 
 ##### `analyze(binary_path, output_dir=None, decompiler="auto", generate_tests=False)`
 
