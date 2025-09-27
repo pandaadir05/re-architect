@@ -1,0 +1,12 @@
+include README.md
+include LICENSE
+include requirements.txt
+include requirements-dev.txt
+include config.yaml
+include pytest.ini
+recursive-include src *.py
+recursive-include docs *.md
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *.so
+recursive-exclude * .DS_Store
