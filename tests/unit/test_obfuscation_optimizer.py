@@ -10,6 +10,7 @@ def test_optimizer_availability():
     assert isinstance(opt.is_available(), bool)
 
 
+@patch('src.optimization.optimizer.ANGR_AVAILABLE', True)
 @patch('src.optimization.optimizer.angr')
 def test_optimizer_runs_iterations(mock_angr):
     # Mock angr project, cfg, state
@@ -30,6 +31,7 @@ def test_optimizer_runs_iterations(mock_angr):
     assert isinstance(report.passes_run, list)
 
 
+@patch('src.optimization.optimizer.ANGR_AVAILABLE', True)
 @patch('src.optimization.optimizer.angr')
 def test_optimizer_converges(mock_angr):
     # Configure passes to produce zero changes (graph has no nodes)
