@@ -75,6 +75,25 @@ config.local.yaml
 # Docker volumes
 docker-volumes/
 
+# Testing and Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Benchmarks
+.benchmarks/
+
+# Backup files
+*.bak
+*~
+*.tmp
+*.temp
+
 # macOS
 .DS_Store
 
