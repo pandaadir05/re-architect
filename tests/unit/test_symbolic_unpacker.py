@@ -158,7 +158,7 @@ class TestSymbolicUnpacker:
     
     def test_unpack_angr_not_available(self):
         """Test unpacking when Angr is not available."""
-        with patch('src.unpacking.symbolic_unpacker.angr', side_effect=ImportError):
+        with patch('src.unpacking.symbolic_unpacker.ANGR_AVAILABLE', False):
             test_binary = self.temp_path / "test_packed.exe"
             test_binary.write_bytes(b"UPX! packed data")
             
@@ -187,7 +187,7 @@ class TestSymbolicUnpacker:
     
     def test_is_available_without_angr(self):
         """Test availability check when Angr is not available."""
-        with patch('src.unpacking.symbolic_unpacker.angr', side_effect=ImportError):
+        with patch('src.unpacking.symbolic_unpacker.ANGR_AVAILABLE', False):
             assert not self.unpacker.is_available()
     
     def test_get_unpacker_info(self):

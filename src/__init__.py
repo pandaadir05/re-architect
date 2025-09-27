@@ -6,8 +6,6 @@ with modern AI-powered insights for binary analysis and security research.
 """
 
 __version__ = "1.0.0"
-__author__ = "RE-Architect Team"
-__email__ = "contact@re-architect.example.com"
 __description__ = "Advanced reverse engineering platform with AI-powered analysis"
 
 # Core exports
